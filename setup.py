@@ -37,7 +37,7 @@ setup(
     maintainer_email='metin__ur.1997@hotmail.com',
     url='https://bitbucket.org/bw-cyclens/cyclens-server',
     license='Unlicense',
-    packages=find_packages(exclude=('tests', 'docs'))
+    packages=find_packages(exclude=('tests', 'docs')),
     classifiers=[
         'License :: Unlicensed',
         'Development Status :: 0 - Development/Init',
