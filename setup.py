@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+from datetime import datetime as dt
+
 import os.path
 import warnings
 import sys
+
+from src import constants
 
 try:
     from setuptools import setup, Command
@@ -23,21 +27,33 @@ except ImportError:
 # Setup Info
 # ===============
 
+PROJECT_NAME = 'Cyclens'
+PROJECT_PACKAGE_NAME = 'src'
+PROJECT_LICENSE = 'Apache License 2.0'
+PROJECT_AUTHOR = 'Furkan Türkal'
+PROJECT_AUTHOR_EMAIL = 'furkan.turkal@hotmail.com'
+PROJECT_MAINTAINER = 'Metin Ur'
+PROJECT_MAINTAINER_EMAIL = 'metin__ur.1997@hotmail.com'
+PROJECT_COPYRIGHT = ' 2018-{}'.format(dt.now().year)
+PROJECT_URL = 'https://bitbucket.org/bw-src/src-server'
+
 DESCRIPTION_SHRT = 'Human Classifier'
-DESCRIPTION_LONG = 'Human Classifier'
+DESCRIPTION_LONG = 'Human Classifier for Humans'
 
 setup(
-    name='Cyclens',
-    version='0.0.0',
+    name=PROJECT_NAME,
+    version=constants.__version__,
     description=DESCRIPTION_SHRT,
     long_description=DESCRIPTION_LONG,
-    author='Furkan Türkal',
-    author_email='furkan.turkal@hotmail.com',
-    maintainer='Metin Ur',
-    maintainer_email='metin__ur.1997@hotmail.com',
-    url='https://bitbucket.org/bw-cyclens/cyclens-server',
-    license='Unlicense',
+    author=PROJECT_AUTHOR,
+    author_email=PROJECT_AUTHOR_EMAIL,
+    maintainer=PROJECT_MAINTAINER,
+    maintainer_email=PROJECT_MAINTAINER_EMAIL,
+    url=PROJECT_URL,
+    license=PROJECT_LICENSE,
     packages=find_packages(exclude=('tests', 'docs')),
+    zip_safe=False,
+    test_suite='tests',
     classifiers=[
         'License :: Unlicensed',
         'Development Status :: 0 - Development/Init',
