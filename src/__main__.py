@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+from __future__ import unicode_literals
+
+# Execute with
+# $ python -m src
+
 import sys
 
 if __package__ is None and not hasattr(sys, 'frozen'):
