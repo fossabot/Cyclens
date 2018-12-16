@@ -35,4 +35,4 @@ class Cyclens(object):
         print('__exit__')
 
     def test(self):
-        print('test')
+        print('test def')
