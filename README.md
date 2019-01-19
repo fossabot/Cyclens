@@ -37,3 +37,9 @@ pip install -r requirements.txt
 * `optirun nvidia-settings -c :8`: Ayarların doğru olduğundan ve *PowerMizer*, `MAX PERFORMANCE` olarak ayarlandığından emin olunmalı 
 
 KANSER OLMAMAK ICIN TUM ADIMLARIN DUZGUN CALISTIGINDAN EMIN OL!!!
+
+## GPU TEST
+
+* `watch -n 1 nvidia-smi`: Açık dursun
+
+* `optirun glxspheres64`: Çalıştır ve kontrol et
