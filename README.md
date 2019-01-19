@@ -30,7 +30,10 @@ pip install -r requirements.txt
 
 ## PostCheck
 
-* `nvidia-smi`: Düzgün çalışmalı
+* `nvidia-smi`: Düzgün çalışıp bilgileri doğru bir şekilde almalı
+
+* `nvidia-settings -q all`: Düzgün çalışıp bilgileri doğru bir şekilde almalı
 
 * `optirun nvidia-settings -c :8`: Ayarların doğru olduğundan ve *PowerMizer*, `MAX PERFORMANCE` olarak ayarlandığından emin olunmalı 
 
+KANSER OLMAMAK ICIN TUM ADIMLARIN DUZGUN CALISTIGINDAN EMIN OL!!!
