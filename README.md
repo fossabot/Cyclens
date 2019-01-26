@@ -1,5 +1,15 @@
 # cyclens-server
 
+## Run
+
+1. `source ./bin/activate`
+2. `python -m cyclens`
+
+## Common Issues
+
+* `emoticon` değil `emotion` !!!
+* `recognation` değil `recognition` !!!
+
 ## Installation
 
 ```bash

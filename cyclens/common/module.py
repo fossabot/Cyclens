@@ -6,28 +6,39 @@ from __future__ import unicode_literals
 
 from multiprocessing import Process, Queue
 
-class Module(object):
+import threading
+
+class Module(threading.Thread):
     """An abstract class for Cyclens modules."""
 
     module_id : None
 
     def __init__(self):
         print("[MODULE::BASE]: __init__")
+        threading.Thread.__init__(self)
         self.process_queue = Queue()
 
-    def on_data_received(self, data):
-        print("[MODULE::EMOTICON_RECOGNATION::ON_DATA_RECEIVED]: " + data)
-        self.process_queue.put(data)
-        return
-        return
-
-    def on_data_sent(self, data):
+    def run(self):
         return
 
     def enqueue(self, data):
-        return
+        if self.process_queue.full():
+            print("[MODULE::ENQUEUE]: Failed to add QUEUE -> FULL")
+            return
+
+        self.process_queue.put(data)
 
     def dequeue(self, data):
+        if not self.process_queue.empty():
+            return self.process_queue.get_nowait()
+
+        return None
+
+    def on_data_received(self, data):
+        print("[MODULE::BASE::ON_DATA_RECEIVED]:")
+        self.enqueue(data)
+
+    def on_data_sent(self, data):
         return
 
     def post_to_preprocessor(self, data):

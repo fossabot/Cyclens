@@ -11,16 +11,18 @@ from .postprocessor import GenderPredictionPOSP
 class GenderPredictionMD(Module):
 
     def __init__(self):
-        Module.__init__(self)
+        super(GenderPredictionMD, self).__init__()
         print("[MODULE::GENDER_PREDICTION]: __init__")
 
         self.prep = GenderPredictionPREP()
         self.proc = GenderPredictionPROC()
         self.posp = GenderPredictionPOSP()
 
-    def on_data_received(self, data):
-        print("[MODULE::GENDER_PREDICTION::ON_DATA_RECEIVED]: " + data)
-        return
-
     def run(self):
+        super(GenderPredictionMD, self).run()
         print("[MODULE::GENDER_PREDICTION]: run()")
+
+    def on_data_received(self, data):
+        super(GenderPredictionMD, self).on_data_received(data)
+        print("[MODULE::GENDER_PREDICTION::ON_DATA_RECEIVED]:")
+        print(data)
