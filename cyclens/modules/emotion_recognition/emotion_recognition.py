@@ -35,7 +35,7 @@ class EmotionRecognitionMD(Module):
 
         while True:
 
-            #Anti CPU gg
+            #Anti -> CPU GG WP EZ
             time.sleep(0.1)
 
             _ready = threading.Event()
