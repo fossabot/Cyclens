@@ -10,13 +10,15 @@ from .postprocessor import GenderPredictionPOSP
 
 class GenderPredictionMD(Module):
 
-    def __init__(self):
-        super(GenderPredictionMD, self).__init__()
+    def __init__(self, ready=None):
+        super(GenderPredictionMD, self).__init__(ready)
         print("[MODULE::GENDER_PREDICTION]: __init__")
 
         self.prep = GenderPredictionPREP()
         self.proc = GenderPredictionPROC()
         self.posp = GenderPredictionPOSP()
+
+        self._ready.set()
 
     def run(self):
         super(GenderPredictionMD, self).run()

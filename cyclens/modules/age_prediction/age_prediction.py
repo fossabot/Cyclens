@@ -10,13 +10,15 @@ from .postprocessor import AgePredictionPOSP
 
 class AgePredictionMD(Module):
 
-    def __init__(self):
-        super(AgePredictionMD, self).__init__()
+    def __init__(self, ready=None):
+        super(AgePredictionMD, self).__init__(ready)
         print("[MODULE::AGE_PREDICTION]: __init__")
 
         self.prep = AgePredictionPREP()
         self.proc = AgePredictionPROC()
         self.posp = AgePredictionPOSP()
+
+        self._ready.set()
 
     def run(self):
         super(AgePredictionMD, self).run()

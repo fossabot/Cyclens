@@ -10,13 +10,15 @@ from .postprocessor import ActionRecognitionPOSP
 
 class ActionRecognitionMD(Module):
 
-    def __init__(self):
-        super(ActionRecognitionMD, self).__init__()
+    def __init__(self, ready=None):
+        super(ActionRecognitionMD, self).__init__(ready)
         print("[MODULE::ACTION_RECOGNITION]: __init__")
 
         self.prep = ActionRecognitionPREP()
         self.proc = ActionRecognitionPROC()
         self.posp = ActionRecognitionPOSP()
+
+        self._ready.set()
 
     def run(self):
         super(ActionRecognitionMD, self).run()

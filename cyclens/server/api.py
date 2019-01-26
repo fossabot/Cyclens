@@ -70,14 +70,14 @@ class ApiServer(threading.Thread):
     def add_routes(self):
         print("[API]: Add routes")
 
-        @self.api.route('/api/test', methods=['POST'])
+        @self.api.route('/api/v1/demo', methods=['POST'])
         def some_route():
             self.data = request.files['file'].read()
             self.npimg = np.frombuffer(self.data, np.uint8)
             self.add_to_queue(self.npimg)
             return "TODO: Make api response great again"
 
-    @api.route('/api/v1/demo', methods=['POST'])
+    @api.route('/api/example', methods=['POST'])
     def demo():
         print(request.files)
         data = request.files['file'].read()
@@ -86,7 +86,7 @@ class ApiServer(threading.Thread):
 
         npimg = np.frombuffer(data, np.uint8)
 
-        self.add_to_queue(npimg)
+        api.add_to_queue(npimg)
 
         print(request_queue.get())
 

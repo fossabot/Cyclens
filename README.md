@@ -5,6 +5,10 @@
 1. `source ./bin/activate`
 2. `python -m cyclens`
 
+## Live Test
+
+`curl -F "file=@/home/dentrax/Pictures/Wallpapers/wp1.jpg" http://localhost:5000/api/v1/demo`
+
 ## Common Issues
 
 * `emoticon` değil `emotion` !!!

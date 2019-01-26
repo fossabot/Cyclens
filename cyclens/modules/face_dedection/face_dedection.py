@@ -10,13 +10,15 @@ from .postprocessor import FaceDedectionPOSP
 
 class FaceDedectionMD(Module):
 
-    def __init__(self):
-        super(FaceDedectionMD, self).__init__()
+    def __init__(self, ready=None):
+        super(FaceDedectionMD, self).__init__(ready)
         print("[MODULE::FACE_DEDECTION]: __init__")
 
         self.prep = FaceDedectionPREP()
         self.proc = FaceDedectionPROC()
         self.posp = FaceDedectionPOSP()
+
+        self._ready.set()
 
     def run(self):
         super(FaceDedectionMD, self).run()

@@ -16,5 +16,18 @@ class EmotionRecognitionPOSP(Processor):
     test : None
 
     def __init__(self):
-        Processor.__init__(self)
+        super(EmotionRecognitionPOSP, self).__init__()
         print("[MODULE::EMOTION_RECOGNITION::POSP]: __init__")
+
+    def run(self):
+        super(EmotionRecognitionPOSP, self).run()
+        return
+
+    def process(self, data, ready):
+        super(EmotionRecognitionPOSP, self).process(data)
+
+
+        self.is_busy = False
+
+        ready.set()
+        return 9999

@@ -13,9 +13,10 @@ class Module(threading.Thread):
 
     module_id : None
 
-    def __init__(self):
+    def __init__(self, ready=None):
         print("[MODULE::BASE]: __init__")
         threading.Thread.__init__(self)
+        self._ready = ready
         self.process_queue = Queue()
 
     def run(self):
@@ -28,7 +29,7 @@ class Module(threading.Thread):
 
         self.process_queue.put(data)
 
-    def dequeue(self, data):
+    def dequeue(self):
         if not self.process_queue.empty():
             return self.process_queue.get_nowait()
 

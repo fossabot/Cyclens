@@ -58,23 +58,44 @@ class Cyclens(object):
         print('\n[CYCLENS::run()]: ===== INITIALIZING API =====')
         self.api = ApiServer()
         self.api.start()
-        #TODO: Api nin baslamasini bekle
-        #Api ye istek gidince Queue ye at
-        #Ana dongude surekli queue bos mu kontrolu yap
-        #Eger bos degilse on_data_received'e istegi gonder
         print('[CYCLENS::run()]: ==============================')
 
         print('\n[CYCLENS::run()]: ===== INITIALIZING SUB-MODULES =====')
-        #self.module_x = get_module("ActionRecognition")
-        self.module_ar = ActionRecognitionMD()
-        self.module_ap = AgePredictionMD()
-        self.module_er = EmotionRecognitionMD()
-        self.module_fd = FaceDedectionMD()
-        self.module_gp = GenderPredictionMD()
+
+        _ready = threading.Event()
+
+        _ready.clear()
+        self.module_ar = ActionRecognitionMD(_ready)
+        _ready.wait()
+
+        _ready.clear()
+        self.module_ap = AgePredictionMD(_ready)
+        _ready.wait()
+
+        _ready.clear()
+        self.module_er = EmotionRecognitionMD(_ready)
+        _ready.wait()
+
+        _ready.clear()
+        self.module_fd = FaceDedectionMD(_ready)
+        _ready.wait()
+
+        _ready.clear()
+        self.module_gp = GenderPredictionMD(_ready)
+        _ready.wait()
+
         print('[CYCLENS::run()]: ======================================')
 
+        print('\n[CYCLENS::run()]: ===== RUNNING SUB-MODULES =====')
+        self.module_ar.start()
+        self.module_ap.start()
+        self.module_er.start()
+        self.module_fd.start()
+        self.module_gp.start()
+        print('[CYCLENS::run()]: =================================')
+
         print('\n[CYCLENS::run()]: RUNNING ASYNC TORNADO WSGI SERVER')
-        print('\n[CYCLENS::run()]: Waiting API requests for \'/api/test\' on port 5000 ...')
+        print('\n[CYCLENS::run()]: Waiting API requests for \'/api/v1/demo\' on port 5000 ...')
 
         while self.api.is_running():
             curr = self.api.get_from_queue()
