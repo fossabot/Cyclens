@@ -17,7 +17,7 @@ __appname__ = 'Cyclens'
 __license__ = 'Apache License 2.0'
 __url__ = 'https://bitbucket.org/bw-src/src-server'
 
-__srcname__ = 'src'
+__srcname__ = 'cyclens'
 
 __author__ = 'Furkan Türkal'
 __authormail__ = 'furkan.turkal@hotmail.com'

@@ -18,7 +18,7 @@ class GenderPredictionMD(Module):
         self.proc = GenderPredictionPROC()
         self.posp = GenderPredictionPOSP()
 
-        self._ready.set()
+        self._event_ready.set()
 
     def run(self):
         super(GenderPredictionMD, self).run()
@@ -27,4 +27,3 @@ class GenderPredictionMD(Module):
     def on_data_received(self, data):
         super(GenderPredictionMD, self).on_data_received(data)
         print("[MODULE::GENDER_PREDICTION::ON_DATA_RECEIVED]:")
-        print(data)

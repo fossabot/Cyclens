@@ -5,6 +5,7 @@ import multiprocessing
 import threading
 import time
 import subprocess
+import sys
 
 from .modules import get_module
 from .constants import __version__
@@ -108,13 +109,22 @@ class Cyclens(object):
 
         print('')
 
+    @classmethod
+    def stop(self):
+        self.module_ar.stop()
+        self.module_ap.stop()
+        self.module_er.stop()
+        self.module_fd.stop()
+        self.module_gp.stop()
+
     def __del__(self):
         print('[CYCLENS::__del__]')
+        sys.exit()
 
     def __enter__(self):
         print('[CYCLENS::__enter__]')
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        #raise PostProcessingError('Command returned error code %d' % 3)
         print('[CYCLENS::__exit__]')
+        self.stop()

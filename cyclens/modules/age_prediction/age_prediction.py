@@ -18,7 +18,7 @@ class AgePredictionMD(Module):
         self.proc = AgePredictionPROC()
         self.posp = AgePredictionPOSP()
 
-        self._ready.set()
+        self._event_ready.set()
 
     def run(self):
         super(AgePredictionMD, self).run()
@@ -27,5 +27,4 @@ class AgePredictionMD(Module):
     def on_data_received(self, data):
         super(AgePredictionMD, self).on_data_received(data)
         print("[MODULE::AGE_PREDICTION::ON_DATA_RECEIVED]:")
-        print(data)
 

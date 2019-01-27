@@ -72,10 +72,16 @@ class ApiServer(threading.Thread):
 
         @self.api.route('/api/v1/demo', methods=['POST'])
         def some_route():
-            self.data = request.files['file'].read()
-            self.npimg = np.frombuffer(self.data, np.uint8)
-            self.add_to_queue(self.npimg)
-            return "TODO: Make api response great again"
+            data = request.files['file'].read()
+            npimg = np.frombuffer(data, np.uint8)
+            img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+            self.add_to_queue(img)
+
+            resp = Response(response="OK", status=200, mimetype="application/json")
+            resp.headers['Content-Type'] = 'application/json; charset=utf-8'
+            resp.headers['Access-Control-Allow-Origin'] = '*'
+
+            return resp
 
     @api.route('/api/example', methods=['POST'])
     def demo():
@@ -86,9 +92,6 @@ class ApiServer(threading.Thread):
 
         npimg = np.frombuffer(data, np.uint8)
 
-        api.add_to_queue(npimg)
-
-        print(request_queue.get())
 
         # PRE-PROCESSOR
         img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
@@ -97,11 +100,11 @@ class ApiServer(threading.Thread):
 
         edges = cv2.Canny(small, 100, 200)
 
-        #cv2.imshow('HSV image', edges)
-        #cv2.waitKey(0)
+        cv2.imshow('HSV image', edges)
+        cv2.waitKey(0)
 
         # PROCESSOR
-        calcHist([img], [0], None, [256], [0, 256])
+        # calcHist([img], [0], None, [256], [0, 256])
 
         color = ('b', 'g', 'r')
         for i, col in enumerate(color):

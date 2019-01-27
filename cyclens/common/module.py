@@ -16,11 +16,20 @@ class Module(threading.Thread):
     def __init__(self, ready=None):
         print("[MODULE::BASE]: __init__")
         threading.Thread.__init__(self)
-        self._ready = ready
+        self._event_ready = ready
+        self._event_stop = threading.Event()
         self.process_queue = Queue()
+        self.is_running = False
 
     def run(self):
-        return
+        self.is_running = True
+
+    def stop(self):
+        self._event_stop.set()
+        self.is_running = False
+
+    def stopped(self):
+        return self._event_stop.is_set()
 
     def enqueue(self, data):
         if self.process_queue.full():
@@ -32,7 +41,6 @@ class Module(threading.Thread):
     def dequeue(self):
         if not self.process_queue.empty():
             return self.process_queue.get_nowait()
-
         return None
 
     def on_data_received(self, data):

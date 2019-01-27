@@ -18,7 +18,7 @@ class FaceDedectionMD(Module):
         self.proc = FaceDedectionPROC()
         self.posp = FaceDedectionPOSP()
 
-        self._ready.set()
+        self._event_ready.set()
 
     def run(self):
         super(FaceDedectionMD, self).run()
@@ -27,4 +27,3 @@ class FaceDedectionMD(Module):
     def on_data_received(self, data):
         super(FaceDedectionMD, self).on_data_received(data)
         print("[MODULE::FACE_DEDECTION::ON_DATA_RECEIVED]:")
-        print(data)

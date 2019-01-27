@@ -12,17 +12,27 @@ class Processor(threading.Thread):
 
     processor_id : None
 
-    def __init__(self, ready=None):
+    def __init__(self, module=None, ready=None):
         print("[PROCESSOR::BASE]: __init__")
-        self.process_queue = Queue()
-        self._lock = threading.Lock()
-        self._event = threading.Event()
-        self._ready = ready
-        self.is_busy = False
         threading.Thread.__init__(self)
+        self.MD = module
+        self.process_queue = Queue()
+        self._thread_lock = threading.Lock()
+        self._thread_event = threading.Event()
+        self._event_ready = ready
+        self._event_stop = threading.Event()
+        self.is_busy = False
+        self.is_running = False
 
     def run(self):
-        return
+        self.is_running = True
+
+    def stop(self):
+        self._event_stop.set()
+        self.is_running = False
+
+    def stopped(self):
+        return self._event_stop.is_set()
 
     def process(self, data):
         self.is_busy = True
@@ -31,20 +41,20 @@ class Processor(threading.Thread):
         return self.is_alive()
 
     def enqueue(self, info):
-        self._lock.acquire()
+        self._thread_lock.acquire()
         try:
             if self.process_queue.full():
                 print("[PROCESS::ENQUEUE]: Failed to add QUEUE -> FULL")
                 return
             self.process_queue.put(info)
         finally:
-            self._lock.release()
+            self._thread_lock.release()
 
     def dequeue(self, info):
-        self._lock.acquire()
+        self._thread_lock.acquire()
         try:
             if not self.process_queue.empty():
                 return self.process_queue.get_nowait()
         finally:
-            self._lock.release()
+            self._thread_lock.release()
         return None

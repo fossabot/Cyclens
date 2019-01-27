@@ -17,7 +17,7 @@ import os.path
 import warnings
 import sys
 
-from src import constants
+from cyclens import constants
 
 try:
     from setuptools import setup, Command
@@ -26,7 +26,7 @@ except ImportError:
     from distutils.core import setup, Command
     setuptools_available = False
 
-from .src import (
+from .cyclens import (
     __appname__,
     __license__,
     __url__,

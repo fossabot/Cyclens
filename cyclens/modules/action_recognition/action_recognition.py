@@ -18,7 +18,7 @@ class ActionRecognitionMD(Module):
         self.proc = ActionRecognitionPROC()
         self.posp = ActionRecognitionPOSP()
 
-        self._ready.set()
+        self._event_ready.set()
 
     def run(self):
         super(ActionRecognitionMD, self).run()
@@ -27,4 +27,3 @@ class ActionRecognitionMD(Module):
     def on_data_received(self, data):
         super(ActionRecognitionMD, self).on_data_received(data)
         print("[MODULE::ACTION_RECOGNATION::ON_DATA_RECEIVED]:")
-        print(data)
