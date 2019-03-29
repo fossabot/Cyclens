@@ -46,6 +46,8 @@ class Cyclens(object):
 
         print('[CYCLENS::__init__]')
 
+    # Her modülün içerisindeki fonksiyon çağırılır ve parametre olarak API request gönderilir
+    # TODO: Burası Async olacak?
     @classmethod
     def on_data_received(self, data):
         self.module_ar.on_data_received(data)
@@ -98,6 +100,8 @@ class Cyclens(object):
         print('\n[CYCLENS::run()]: RUNNING ASYNC TORNADO WSGI SERVER')
         print('\n[CYCLENS::run()]: Waiting API requests for \'/api/v1/demo\' on port 5000 ...')
 
+        # API'ye istek yapıldı mı sürekli kontrol et
+        # eğer yapılmış ise 'on_data_received' fonksiyonunu çalıştır
         while self.api.is_running():
             curr = self.api.get_from_queue()
             if curr is not None:
