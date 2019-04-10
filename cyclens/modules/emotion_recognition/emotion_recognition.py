@@ -14,14 +14,11 @@ from .processor import EmotionRecognitionPROC
 from .postprocessor import EmotionRecognitionPOSP
 
 import os
+import cv2
 import numpy as np
-import tflearn
 import tensorflow as tf
-from tflearn.layers.core import input_data, dropout, fully_connected, flatten
-from tflearn.layers.conv import conv_2d, max_pool_2d, avg_pool_2d
-from tflearn.layers.merge_ops import merge
-from tflearn.layers.normalization import local_response_normalization
-from tflearn.layers.estimator import regression
+import keras
+from keras.models import load_model
 from os.path import isfile, join
 from os.path import dirname as up
 
@@ -45,27 +42,54 @@ class EmotionRecognitionMD(Module):
         self.posp = EmotionRecognitionPOSP(self, _ready)
         _ready.wait()
 
-        self.target_classes = ['angry', 'disgusted', 'fearful', 'happy', 'sad', 'surprised', 'neutral']
+        keras.backend.clear_session()
 
-        self.network = input_data(shape=[None, 48, 48, 1])
-        self.network = conv_2d(self.network, 64, 5, activation='relu')
-        self.network = max_pool_2d(self.network, 3, strides=2)
-        self.network = conv_2d(self.network, 64, 5, activation='relu')
-        self.network = max_pool_2d(self.network, 3, strides=2)
-        self.network = conv_2d(self.network, 128, 4, activation='relu')
-        self.network = dropout(self.network, 0.3)
-        self.network = fully_connected(self.network, 3072, activation = 'relu')
-        self.network = fully_connected(self.network, len(self.target_classes), activation='softmax')
-        self.network = regression(self.network, optimizer='momentum', metric='accuracy', loss='categorical_crossentropy')
-        self.model = tflearn.DNN(self.network, checkpoint_path='model_1_atul', max_checkpoints=1, tensorboard_verbose=2)
+        self.CASC_FACE = None
 
-        os.chdir("data/models/")
-        if isfile("model_1_atul.tflearn.meta"):
-            self.model.load("model_1_atul.tflearn")
+        self.EMOTIONS = ['angry', 'disgusted', 'fearful', 'happy', 'sad', 'surprised', 'neutral']
+
+        detection_model_path = '../../data/models/detection/haarcascade_frontalface_default.xml'
+        emotion_model_path = '../data/models/emotion/fer2013_mini_XCEPTION.102-0.66.hdf5'
+        emotion_model = 'fer2013_mini_XCEPTION.102-0.66.hdf5'
+        #gender_model_path = '../trained_models/gender_models/simple_CNN.81-0.96.hdf5'
+        self.emotion_labels = self.get_labels('fer2013')
+        #gender_labels = get_labels('imdb')
+        #font = cv2.FONT_HERSHEY_SIMPLEX
+
+        # loading models
+        #face_detection = cv2.CascadeClassifier(detection_model_path)
+        #gender_classifier = load_model(gender_model_path, compile=False)
+
+        # getting input model shapes for inference
+        #gender_target_size = gender_classifier.input_shape[1:3]
+
+        if isfile("../data/models/dedection/haarcascade_frontalface_default.xml"):
+            self.CASC_FACE = cv2.CascadeClassifier('../data/models/dedection/haarcascade_frontalface_default.xml')
         else:
-            print("---> Couldn't find model")
+            print("---> Couldn't find cascade model")
+            exit(1)
+
+        if isfile(emotion_model_path):
+            self.emotion_classifier = load_model(emotion_model_path, compile=False)
+            self.emotion_classifier._make_predict_function()
+            self.emotion_target_size = self.emotion_classifier.input_shape[1:3]
+            print("---> Emotion data set Loaded!!!")
+        else:
+            print("---> Couldn't find Emotion data set path")
+            exit(1)
 
         self._event_ready.set()
+
+    def get_labels(self, dataset_name):
+        if dataset_name == 'fer2013':
+            return {0: 'angry', 1: 'disgust', 2: 'fear', 3: 'happy',
+                    4: 'sad', 5: 'surprise', 6: 'neutral'}
+        elif dataset_name == 'imdb':
+            return {0: 'woman', 1: 'man'}
+        elif dataset_name == 'KDEF':
+            return {0: 'AN', 1: 'DI', 2: 'AF', 3: 'HA', 4: 'SA', 5: 'SU', 6: 'NE'}
+        else:
+            raise Exception('Invalid dataset name')
 
     def run(self):
         super(EmotionRecognitionMD, self).run()

@@ -1,6 +1,6 @@
 # coding: utf-8
 
-"""Post-processor functions for Face Dedection"""
+"""Post-processor functions for Face Recognition"""
 
 from __future__ import unicode_literals
 
@@ -11,10 +11,10 @@ from ...utils import (
     PostProcessingError,
 )
 
-class FaceDedectionPOSP(Processor):
+class FaceRecognitionPOSP(Processor):
 
     test : None
 
     def __init__(self):
         Processor.__init__(self)
-        print("[MODULE::FACE_DEDECTION::POSP]: __init__")
+        print("[MODULE::FACE_RECOGNITION::POSP]: __init__")

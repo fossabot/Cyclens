@@ -1,6 +1,6 @@
 # coding: utf-8
 
-"""Processor functions for Face Dedection"""
+"""Pre-processor functions for Face Recognition"""
 
 from __future__ import unicode_literals
 
@@ -8,13 +8,13 @@ from ...common.module import Module
 from ...common.processor import Processor
 
 from ...utils import (
-    ProcessingError,
+    PreProcessingError,
 )
 
-class FaceDedectionPROC(Processor):
+class FaceRecognitionPREP(Processor):
 
     test : None
 
     def __init__(self):
         Processor.__init__(self)
-        print("[MODULE::FACE_DEDECTION::PROC]: __init__")
+        print("[MODULE::FACE_RECOGNITION::PREP]: __init__")

@@ -14,6 +14,8 @@ from ...utils import (
     PreProcessingError,
 )
 
+
+# noinspection PyPackageRequirements
 class EmotionRecognitionPREP(Processor):
 
     test : None
@@ -40,37 +42,65 @@ class EmotionRecognitionPREP(Processor):
         image = image.reshape([-1, 48, 48, 1])
         return self.MD.model.predict(image)
 
+    def preprocess_input(self, x, v2=True):
+        x = x.astype('float32')
+        x = x / 255.0
+        if v2:
+            x = x - 0.5
+            x = x * 2.0
+        return x
+
+    def apply_offsets(self, face, offsets):
+        x, y, width, height = face
+        x_off, y_off = offsets
+        return (x - x_off, x + width + x_off, y - y_off, y + height + y_off)
+
     def process(self, data, ready):
         super(EmotionRecognitionPREP, self).process(data)
 
         if data is None:
-            print("data Noneeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+            print("There is no data to process!!!")
             return None
 
-        EMOTIONS = ['angry', 'disgusted', 'fearful', 'happy', 'sad', 'surprised', 'neutral']
-        cascface = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-        gray = cv2.cvtColor(data, cv2.COLOR_BGR2GRAY)
-        faces = cascface.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
+        emotion_offsets = (20, 40)
+        gray_image = cv2.cvtColor(data, cv2.COLOR_BGR2GRAY)
+        faces = self.MD.CASC_FACE.detectMultiScale(gray_image, scaleFactor=1.3, minNeighbors=5)
 
         print("RESULT=====================================================================================")
         print("Total faces found: ")
         print(len(faces))
+
+        process_index = 0
+
         if len(faces) > 0:
             for face in faces:
-                (x, y, w, h) = face
-                data = cv2.rectangle(data, (x, y-30), (x+w, y+h+10), (255, 0, 0), 2)
-                newimg = data[y:y+h, x:x+w]
-                newimg = cv2.resize(newimg, (48, 48), interpolation=cv2.INTER_CUBIC) / 255.
+                #(x, y, w, h) = face
+                x, y, w, h = self.apply_offsets(face, emotion_offsets)
+                gray_face = gray_image[w:h, x:y]
 
-                #cv2.imshow("a", newimg)
-                #cv2.waitKey(0)
+                try:
+                    gray_face = cv2.resize(gray_face, (self.MD.emotion_target_size))
+                    #cv2.imshow("a", gray_face)
+                    #cv2.waitKey(1000)
+                    #cv2.destroyAllWindows()
+                except:
+                    continue
 
-                result = self.predict(newimg)
+                gray_face = self.preprocess_input(gray_face, True)
+                gray_face = np.expand_dims(gray_face, 0)
+                gray_face = np.expand_dims(gray_face, -1)
+                result = self.MD.emotion_classifier.predict(gray_face)
+
                 if result is not None:
-                    maxindex = np.argmax(result[0])
-                    print("Emotion: ")
-                    print(maxindex)
-                    print(EMOTIONS[maxindex])
+                    process_index += 1
+                    emotion_label_arg = np.argmax(result)
+                    emotion_text = self.MD.emotion_labels[emotion_label_arg]
+                    print("Emotion:")
+                    print(emotion_text)
+
+        if process_index != len(faces):
+            print('There are {} face but {} face processed successfully. Please check what (tf) is going on!'.format(len(faces), process_index))
+
         print("===========================================================================================")
 
         self.is_busy = False

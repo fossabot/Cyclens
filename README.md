@@ -5,6 +5,12 @@
 1. `source ./bin/activate`
 2. `python -m cyclens`
 
+## Run 2
+
+1. `source ./bin/activate`
+2. `cd cyclens`
+3. `python __main__.py`
+
 ## Live Test
 
 `curl -F "file=@/home/dentrax/Pictures/Wallpapers/wp1.jpg" http://localhost:5000/api/v1/demo`

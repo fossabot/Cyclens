@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from .action_recognition.action_recognition import ActionRecognitionMD
 from .age_prediction.age_prediction import AgePredictionMD
 from .emotion_recognition.emotion_recognition import EmotionRecognitionMD
-from .face_dedection.face_dedection import FaceDedectionMD
+from .face_recognition.face_recognition import FaceRecognitionMD
 from .gender_prediction.gender_prediction import GenderPredictionMD
 
 _ALL_CLASSES = [

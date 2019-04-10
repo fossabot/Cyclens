@@ -14,7 +14,7 @@ from .server import ApiServer
 from .modules.action_recognition.action_recognition import ActionRecognitionMD
 from .modules.age_prediction.age_prediction import AgePredictionMD
 from .modules.emotion_recognition.emotion_recognition import EmotionRecognitionMD
-from .modules.face_dedection.face_dedection import FaceDedectionMD
+from .modules.face_recognition.face_recognition import FaceRecognitionMD
 from .modules.gender_prediction.gender_prediction import GenderPredictionMD
 
 from .utils import (
@@ -53,7 +53,7 @@ class Cyclens(object):
         self.module_ar.on_data_received(data)
         self.module_ap.on_data_received(data)
         self.module_er.on_data_received(data)
-        self.module_fd.on_data_received(data)
+        self.module_fr.on_data_received(data)
         self.module_gp.on_data_received(data)
 
     @classmethod
@@ -80,7 +80,7 @@ class Cyclens(object):
         _ready.wait()
 
         _ready.clear()
-        self.module_fd = FaceDedectionMD(_ready)
+        self.module_fr = FaceRecognitionMD(_ready)
         _ready.wait()
 
         _ready.clear()
@@ -93,7 +93,7 @@ class Cyclens(object):
         self.module_ar.start()
         self.module_ap.start()
         self.module_er.start()
-        self.module_fd.start()
+        self.module_fr.start()
         self.module_gp.start()
         print('[CYCLENS::run()]: =================================')
 
