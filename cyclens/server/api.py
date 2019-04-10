@@ -54,11 +54,29 @@ class ApiServer(threading.Thread):
     def add_routes(self):
         print("[API]: Add routes")
 
+        @self.api.route('/api/v1/demo/action', methods = ['POST'])
+        def route_action():
+            img = self.get_img(request)
+            res = self.cyclens.module_ar.do_process(img)
+            return self.get_res(res)
+
+        @self.api.route('/api/v1/demo/age', methods = ['POST'])
+        def route_age():
+            img = self.get_img(request)
+            res = self.cyclens.module_ap.do_process(img)
+            return self.get_res(res)
+
         @self.api.route('/api/v1/demo/emotion', methods=['POST'])
         def route_emotion():
             img = self.get_img(request)
             res = self.cyclens.module_er.do_process(img)
 
+            return self.get_res(res)
+
+        @self.api.route('/api/v1/demo/face', methods = ['POST'])
+        def route_face():
+            img = self.get_img(request)
+            res = self.cyclens.module_fr.do_process(img)
             return self.get_res(res)
 
         @self.api.route('/api/v1/demo/gender', methods = ['POST'])
@@ -67,11 +85,6 @@ class ApiServer(threading.Thread):
             res = self.cyclens.module_gp.do_process(img)
             return self.get_res(res)
 
-        @self.api.route('/api/v1/demo/face', methods = ['POST'])
-        def route_face():
-            img = self.get_img(request)
-            res = self.cyclens.module_fr.do_process(img)
-            return self.get_res(res)
 
     def get_img(self, request):
         data = request.files['file'].read()
