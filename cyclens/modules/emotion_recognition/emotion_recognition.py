@@ -45,34 +45,26 @@ class EmotionRecognitionMD(Module):
         keras.backend.clear_session()
 
         self.CASC_FACE = None
+        self.CASC_EMOTION = None
 
         self.EMOTIONS = ['angry', 'disgusted', 'fearful', 'happy', 'sad', 'surprised', 'neutral']
 
-        detection_model_path = '../../data/models/detection/haarcascade_frontalface_default.xml'
+        detection_model_path = '../data/models/detection/haarcascade_frontalface_default.xml'
         emotion_model_path = '../data/models/emotion/fer2013_mini_XCEPTION.102-0.66.hdf5'
-        emotion_model = 'fer2013_mini_XCEPTION.102-0.66.hdf5'
-        #gender_model_path = '../trained_models/gender_models/simple_CNN.81-0.96.hdf5'
+
         self.emotion_labels = self.get_labels('fer2013')
-        #gender_labels = get_labels('imdb')
-        #font = cv2.FONT_HERSHEY_SIMPLEX
 
-        # loading models
-        #face_detection = cv2.CascadeClassifier(detection_model_path)
-        #gender_classifier = load_model(gender_model_path, compile=False)
-
-        # getting input model shapes for inference
-        #gender_target_size = gender_classifier.input_shape[1:3]
-
-        if isfile("../data/models/dedection/haarcascade_frontalface_default.xml"):
-            self.CASC_FACE = cv2.CascadeClassifier('../data/models/dedection/haarcascade_frontalface_default.xml')
+        if isfile(detection_model_path):
+            self.CASC_FACE = cv2.CascadeClassifier(detection_model_path)
+            print("---> Face detection data set Loaded!!!")
         else:
             print("---> Couldn't find cascade model")
             exit(1)
 
         if isfile(emotion_model_path):
-            self.emotion_classifier = load_model(emotion_model_path, compile=False)
-            self.emotion_classifier._make_predict_function()
-            self.emotion_target_size = self.emotion_classifier.input_shape[1:3]
+            self.CASC_EMOTION = load_model(emotion_model_path, compile=False)
+            self.CASC_EMOTION._make_predict_function()
+            self.emotion_target_size = self.CASC_EMOTION.input_shape[1:3]
             print("---> Emotion data set Loaded!!!")
         else:
             print("---> Couldn't find Emotion data set path")
@@ -82,8 +74,7 @@ class EmotionRecognitionMD(Module):
 
     def get_labels(self, dataset_name):
         if dataset_name == 'fer2013':
-            return {0: 'angry', 1: 'disgust', 2: 'fear', 3: 'happy',
-                    4: 'sad', 5: 'surprise', 6: 'neutral'}
+            return {0: 'angry', 1: 'disgust', 2: 'fear', 3: 'happy', 4: 'sad', 5: 'surprise', 6: 'neutral'}
         elif dataset_name == 'imdb':
             return {0: 'woman', 1: 'man'}
         elif dataset_name == 'KDEF':
