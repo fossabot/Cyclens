@@ -13,7 +13,13 @@
 
 ## Live Test
 
+* Fast
+
 `curl -F "file=@/home/dentrax/Pictures/Wallpapers/wp1.jpg" http://localhost:5000/api/v1/demo`
+
+* Pretty
+
+`curl -F "file=@/home/dentrax/Projects/Bitbucket/cyclens-server/tests/images/test3.jpg" http://localhost:5000/api/v1/demo | python -m json.tool | bat -p -l json`
 
 ## Common Issues
 

@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-import multiprocessing
 import threading
 import time
-import subprocess
+import keras
 import sys
 
 from .modules import get_module
@@ -59,11 +58,13 @@ class Cyclens(object):
     @classmethod
     def run(self):
         print('\n[CYCLENS::run()]: ===== INITIALIZING API =====')
-        self.api = ApiServer()
+        self.api = ApiServer(self)
         self.api.start()
         print('[CYCLENS::run()]: ==============================')
 
         print('\n[CYCLENS::run()]: ===== INITIALIZING SUB-MODULES =====')
+
+        keras.backend.clear_session()
 
         _ready = threading.Event()
 
@@ -103,10 +104,6 @@ class Cyclens(object):
         # API'ye istek yapıldı mı sürekli kontrol et
         # eğer yapılmış ise 'on_data_received' fonksiyonunu çalıştır
         while self.api.is_running():
-            curr = self.api.get_from_queue()
-            if curr is not None:
-                self.on_data_received(curr)
-
             time.sleep(0.01)
 
         print('[CYCLENS::run()]: ============================================')
@@ -118,7 +115,7 @@ class Cyclens(object):
         self.module_ar.stop()
         self.module_ap.stop()
         self.module_er.stop()
-        self.module_fd.stop()
+        self.module_fr.stop()
         self.module_gp.stop()
 
     def __del__(self):

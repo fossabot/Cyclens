@@ -36,6 +36,7 @@ class Processor(threading.Thread):
 
     def process(self, data):
         self.is_busy = True
+        return None
 
     def is_available(self):
         return self.is_alive()

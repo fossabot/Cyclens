@@ -43,21 +43,11 @@ class Module(threading.Thread):
             return self.process_queue.get_nowait()
         return None
 
-    def on_data_received(self, data):
+    def do_process(self, data):
         print("[MODULE::BASE::ON_DATA_RECEIVED]:")
         self.enqueue(data)
 
-    def on_data_sent(self, data):
-        return
-
-    def post_to_preprocessor(self, data):
-        return
-
-    def post_to_processor(self, data):
-        return
-
-    def post_to_postprocessor(self, data):
-        return
+        return None
 
     def print_debug(self, data):
         return

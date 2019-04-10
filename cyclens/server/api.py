@@ -27,30 +27,16 @@ class ApiServer(threading.Thread):
 
     api = Flask(__name__)
 
-    request_queue = None
-
-    def __init__(self):
+    def __init__(self, cyclens):
         print("[API]: __init__")
         threading.Thread.__init__(self)
-        self.request_queue = Queue()
+
+        self.cyclens = cyclens
 
     def run(self):
         self.add_routes()
         self.start_api(debug=False, host="localhost", port=5000)
         print("[API]: run")
-
-    def add_to_queue(self, request):
-        if self.request_queue.full():
-            print("[API::ADD_TO_QUEUE]: Failed to add QUEUE -> FULL")
-            return
-
-        self.request_queue.put(request)
-
-    def get_from_queue(self):
-        if self.request_queue.empty():
-            return None
-
-        return self.request_queue.get()
 
     def start_api(self, debug, host, port):
         print("[API]: start")
@@ -59,10 +45,8 @@ class ApiServer(threading.Thread):
         http_server = HTTPServer(WSGIContainer(self.api))
         http_server.listen(port)
         IOLoop.instance().start()
-        #self.api.run(debug=debug, host=host, port=port)
 
     def is_running(self):
-        #TODO: Make real return pls
         return True
 
     # Test: curl -i -X POST -H "Content-Type: multipart/form-data" -F "file=@/home/dentrax/Pictures/Wallpapers/wp1.jpg" http://localhost:5000/test/demo
@@ -70,18 +54,38 @@ class ApiServer(threading.Thread):
     def add_routes(self):
         print("[API]: Add routes")
 
-        @self.api.route('/api/v1/demo', methods=['POST'])
-        def some_route():
-            data = request.files['file'].read()
-            npimg = np.frombuffer(data, np.uint8)
-            img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
-            self.add_to_queue(img)
+        @self.api.route('/api/v1/demo/emotion', methods=['POST'])
+        def route_emotion():
+            img = self.get_img(request)
+            res = self.cyclens.module_er.do_process(img)
 
-            resp = Response(response="OK", status=200, mimetype="application/json")
-            resp.headers['Content-Type'] = 'application/json; charset=utf-8'
-            resp.headers['Access-Control-Allow-Origin'] = '*'
+            return self.get_res(res)
 
-            return resp
+        @self.api.route('/api/v1/demo/gender', methods = ['POST'])
+        def route_gender():
+            img = self.get_img(request)
+            res = self.cyclens.module_gp.do_process(img)
+            return self.get_res(res)
+
+        @self.api.route('/api/v1/demo/face', methods = ['POST'])
+        def route_face():
+            img = self.get_img(request)
+            res = self.cyclens.module_fr.do_process(img)
+            return self.get_res(res)
+
+    def get_img(self, request):
+        data = request.files['file'].read()
+        npimg = np.frombuffer(data, np.uint8)
+        img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
+
+        return img
+
+    def get_res(self, res):
+        resp = Response(response = res, status = 200, mimetype = "application/json")
+        resp.headers['Content-Type'] = 'application/json; charset=utf-8'
+        resp.headers['Access-Control-Allow-Origin'] = '*'
+
+        return resp
 
     @api.route('/api/example', methods=['POST'])
     def demo():
