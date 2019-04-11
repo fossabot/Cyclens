@@ -56,22 +56,22 @@ class Processor(threading.Thread):
     def get_response_time_estimated(self):
         if len(self.response_times) == 0:
             return 0
-        return sum(self.response_times) / len(self.response_times)
+        return round(sum(self.response_times) / len(self.response_times), 2)
 
     def get_response_time_std(self):
         if len(self.response_times) < 2:
             return 0
-        return np.std(self.response_times, ddof=1)
+        return round(np.std(self.response_times, ddof=1), 2)
 
     def get_response_time_rms(self):
         if len(self.response_times) == 0:
             return 0
-        return np.sqrt(np.mean(np.square(self.response_times)))
+        return round(np.sqrt(np.mean(np.square(self.response_times))), 2)
 
     def get_average_crash_rate(self):
         if self.total_processed == 0:
             return 0
-        return self.process_fails / self.total_processed * 100
+        return round(self.process_fails / self.total_processed * 100, 2)
 
     def get_total_processed(self):
         return self.total_processed

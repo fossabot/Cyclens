@@ -70,7 +70,7 @@ class EmotionRecognitionPROC(Processor):
 
                     x, y, w, h = set_offsets(face, (20, 40))
 
-                    result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'result': 'null', 'success': False}
+                    result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'confidence': 0, 'result': 'null', 'success': False}
 
                     face_gray = image_gray[w:h, x:y]
 
@@ -91,9 +91,11 @@ class EmotionRecognitionPROC(Processor):
 
                     if predict is not None:
                         total_success_count += 1
+                        confidence = np.max(predict)
                         arg = np.argmax(predict)
                         text = self.MD.EMOTIONS[arg]
 
+                        result_face['confidence'] = round(float(confidence), 2)
                         result_face['result'] = text
                         result_face['success'] = True
 
@@ -108,8 +110,9 @@ class EmotionRecognitionPROC(Processor):
 
             rate = len(faces) / total_success_count * 100
 
-            result['rate'] = rate
+            print("Processing success rate: %{}".format(rate))
 
+            result['rate'] = rate
             result['success'] = True
             self.process_successes += 1
         except:
@@ -125,9 +128,8 @@ class EmotionRecognitionPROC(Processor):
         self.response_times.append(ms_diff)
 
         result['process']['end'] = get_date_str(date_end)
-        result['process']['total'] = ms_diff
+        result['process']['total'] = round(ms_diff, 2)
 
-        print("Processing success rate: %{}".format(rate))
         print("===========================================================================================")
 
         self.is_busy = False

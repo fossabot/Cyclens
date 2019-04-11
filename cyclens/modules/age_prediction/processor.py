@@ -114,8 +114,9 @@ class AgePredictionPROC(Processor):
 
             rate = len(faces) / total_success_count * 100
 
-            result['rate'] = rate
+            print("Processing success rate: %{}".format(rate))
 
+            result['rate'] = rate
             result['success'] = True
             self.process_successes += 1
         except:
@@ -131,9 +132,8 @@ class AgePredictionPROC(Processor):
         self.response_times.append(ms_diff)
 
         result['process']['end'] = get_date_str(date_end)
-        result['process']['total'] = ms_diff
+        result['process']['total'] = round(ms_diff, 2)
 
-        print("Processing success rate: %{}".format(rate))
         print("===========================================================================================")
 
         self.is_busy = False
