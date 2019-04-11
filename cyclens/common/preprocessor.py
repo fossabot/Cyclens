@@ -4,6 +4,8 @@
 
 from __future__ import unicode_literals
 
+from datetime import datetime
+
 from multiprocessing import Process, Queue
 import threading
 
@@ -21,3 +23,7 @@ def set_offsets(face, offsets):
     x, y, width, height = face
     x_off, y_off = offsets
     return x - x_off, x + width + x_off, y - y_off, y + height + y_off
+
+
+def get_date_now():
+    return datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')

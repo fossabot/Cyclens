@@ -4,13 +4,14 @@
 
 from __future__ import unicode_literals
 
-from ...common.preprocessor import div_255, set_offsets
+from ...common.preprocessor import div_255, set_offsets, get_date_now
 
 from ...common.processor import Processor
 
 import cv2
 import numpy as np
 import json
+
 
 from ...utils import (
     ProcessingError,
@@ -38,7 +39,7 @@ class EmotionRecognitionPROC(Processor):
     def process(self, data):
         super(EmotionRecognitionPROC, self).process(data)
 
-        result = {'module': 'emotion_recognition', 'success': False, 'message': 'null', 'found': 0, 'rate': 0, 'faces': []}
+        result = {'module': 'emotion_recognition', 'success': False, 'message': 'null', 'process': {'start': get_date_now(), 'end': 0}, 'found': 0, 'rate': 0, 'faces': []}
 
         if data is None:
             result['success'] = False
@@ -103,6 +104,7 @@ class EmotionRecognitionPROC(Processor):
 
         rate = len(faces) / total_success_count * 100
 
+        result['process']['end'] = get_date_now()
         result['rate'] = rate
         result['success'] = True
 
