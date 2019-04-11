@@ -78,7 +78,7 @@ class AgePredictionPROC(Processor):
                     # null check ve image.shape checks
                     (x, y, w, h) = cropped
 
-                    result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'result': 'null', 'success': False}
+                    result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'confidence': 0, 'result': 'null', 'success': False}
                     result['faces'].append(result_face)
 
                     # print(type(face_img)) # numpy.ndarray
@@ -95,13 +95,17 @@ class AgePredictionPROC(Processor):
                         predicted_genders = predict[0]
                         ages = np.arange(0, 101).reshape(101, 1)
                         predicted_ages = predict[1].dot(ages).flatten()
+                        predicted_confidences = predict[1]
 
                         for i, face in enumerate(faces):
                             total_success_count += 1
 
+                            confidence = np.max(predicted_confidences[i])
                             age = int(predicted_ages[i])
+
                             #gender = "F" if predicted_genders[i][0] > 0.5 else "M"
 
+                            result['faces'][i]['confidence'] = round(float(confidence), 2)
                             result['faces'][i]['result'] = age
                             result['faces'][i]['success'] = True
 
