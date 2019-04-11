@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 
-from ...common.preprocessor import div_255, set_offsets, get_date_now
+from ...common.preprocessor import div_255, set_offsets, get_date_now, get_date_str
 from ...common.processor import Processor
 
 import cv2
@@ -36,8 +36,10 @@ class GenderPredictionPROC(Processor):
     def process(self, data):
         super(GenderPredictionPROC, self).process(data)
 
+        date_start = get_date_now()
+
         # Response dönecek olan JSON objesi
-        result = {'module': 'gender_prediction', 'success': False, 'message': 'null', 'process': {'start': get_date_now(), 'end': 0}, 'found': 0, 'rate': 0, 'faces': []}
+        result = {'module': 'gender_prediction', 'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'found': 0, 'rate': 0, 'faces': []}
 
         if data is None:
             result['success'] = False
@@ -101,7 +103,10 @@ class GenderPredictionPROC(Processor):
 
         rate = len(faces) / total_success_count * 100
 
-        result['process']['end'] = get_date_now()
+        date_end = get_date_now()
+
+        result['process']['end'] = get_date_str(date_end)
+        result['process']['total'] = (date_end - date_start).microseconds / 1000
         result['rate'] = rate
         result['success'] = True
 
