@@ -17,6 +17,9 @@ class ActionRecognitionMD(Module):
         super(ActionRecognitionMD, self).__init__(ready)
         print("[MODULE::ACTION_RECOGNITION]: __init__")
 
+        self.module_id = 0
+        self.module_name = 'action_recognition'
+
         _ready = threading.Event()
 
         _ready.clear()

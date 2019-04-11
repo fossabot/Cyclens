@@ -18,6 +18,9 @@ class FaceRecognitionMD(Module):
         super(FaceRecognitionMD, self).__init__(ready)
         print("[MODULE::FACE_RECOGNITION]: __init__")
 
+        self.module_id = 3
+        self.module_name = 'face_recognition'
+
         _ready = threading.Event()
 
         _ready.clear()

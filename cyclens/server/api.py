@@ -54,6 +54,90 @@ class ApiServer(threading.Thread):
     def add_routes(self):
         print("[API]: Add routes")
 
+        @self.api.route('/api/v1/demo/status', methods = ['POST'])
+        def status():
+
+            result = {'type': 'status', 'modules': []}
+
+            result_ar = {'id': self.cyclens.module_ar.get_id(),
+                         'name': self.cyclens.module_ar.get_name(),
+                         'is_available': self.cyclens.module_ar.processor.is_available(),
+                         'is_running': self.cyclens.module_ar.is_running,
+                         'is_processor_running': self.cyclens.module_ar.processor.is_running,
+                         'total_processed': self.cyclens.module_ar.processor.get_total_processed(),
+                         'process_fails': self.cyclens.module_ar.processor.get_process_fails(),
+                         'process_successes': self.cyclens.module_ar.processor.get_process_successes(),
+                         'average_crash_rate': self.cyclens.module_ar.processor.get_average_crash_rate(),
+                         'response_time_estimated': self.cyclens.module_ar.processor.get_response_time_estimated(),
+                         'response_time_std': self.cyclens.module_ar.processor.get_response_time_std(),
+                         'response_time_rms': self.cyclens.module_ar.processor.get_response_time_rms()}
+
+            result['modules'].append(result_ar)
+
+            result_ap = {'id': self.cyclens.module_ap.get_id(),
+                         'name': self.cyclens.module_ap.get_name(),
+                         'is_available': self.cyclens.module_ap.processor.is_available(),
+                         'is_running': self.cyclens.module_ap.is_running,
+                         'is_processor_running': self.cyclens.module_ap.processor.is_running,
+                         'total_processed': self.cyclens.module_ap.processor.get_total_processed(),
+                         'process_fails': self.cyclens.module_ap.processor.get_process_fails(),
+                         'process_successes': self.cyclens.module_ap.processor.get_process_successes(),
+                         'average_crash_rate': self.cyclens.module_ap.processor.get_average_crash_rate(),
+                         'response_time_estimated': self.cyclens.module_ap.processor.get_response_time_estimated(),
+                         'response_time_std': self.cyclens.module_ap.processor.get_response_time_std(),
+                         'response_time_rms': self.cyclens.module_ap.processor.get_response_time_rms()}
+
+            result['modules'].append(result_ap)
+
+            result_er = {'id': self.cyclens.module_er.get_id(),
+                         'name': self.cyclens.module_er.get_name(),
+                         'is_available': self.cyclens.module_er.processor.is_available(),
+                         'is_running': self.cyclens.module_er.is_running,
+                         'is_processor_running': self.cyclens.module_er.processor.is_running,
+                         'total_processed': self.cyclens.module_er.processor.get_total_processed(),
+                         'process_fails': self.cyclens.module_er.processor.get_process_fails(),
+                         'process_successes': self.cyclens.module_er.processor.get_process_successes(),
+                         'average_crash_rate': self.cyclens.module_er.processor.get_average_crash_rate(),
+                         'response_time_estimated': self.cyclens.module_er.processor.get_response_time_estimated(),
+                         'response_time_std': self.cyclens.module_er.processor.get_response_time_std(),
+                         'response_time_rms': self.cyclens.module_er.processor.get_response_time_rms()}
+
+            result['modules'].append(result_er)
+
+            result_fr = {'id': self.cyclens.module_fr.get_id(),
+                         'name': self.cyclens.module_fr.get_name(),
+                         'is_available': self.cyclens.module_fr.processor.is_available(),
+                         'is_running': self.cyclens.module_fr.is_running,
+                         'is_processor_running': self.cyclens.module_fr.processor.is_running,
+                         'total_processed': self.cyclens.module_fr.processor.get_total_processed(),
+                         'process_fails': self.cyclens.module_fr.processor.get_process_fails(),
+                         'process_successes': self.cyclens.module_fr.processor.get_process_successes(),
+                         'average_crash_rate': self.cyclens.module_fr.processor.get_average_crash_rate(),
+                         'response_time_estimated': self.cyclens.module_fr.processor.get_response_time_estimated(),
+                         'response_time_std': self.cyclens.module_fr.processor.get_response_time_std(),
+                         'response_time_rms': self.cyclens.module_fr.processor.get_response_time_rms()}
+
+            result['modules'].append(result_fr)
+
+            result_gp = {'id': self.cyclens.module_gp.get_id(),
+                         'name': self.cyclens.module_gp.get_name(),
+                         'is_available': self.cyclens.module_gp.processor.is_available(),
+                         'is_running': self.cyclens.module_gp.is_running,
+                         'is_processor_running': self.cyclens.module_gp.processor.is_running,
+                         'total_processed': self.cyclens.module_gp.processor.get_total_processed(),
+                         'process_fails': self.cyclens.module_gp.processor.get_process_fails(),
+                         'process_successes': self.cyclens.module_gp.processor.get_process_successes(),
+                         'average_crash_rate': self.cyclens.module_gp.processor.get_average_crash_rate(),
+                         'response_time_estimated': self.cyclens.module_gp.processor.get_response_time_estimated(),
+                         'response_time_std': self.cyclens.module_gp.processor.get_response_time_std(),
+                         'response_time_rms': self.cyclens.module_gp.processor.get_response_time_rms()}
+
+            result['modules'].append(result_gp)
+
+            res = json.dumps(result)
+
+            return self.get_res(res)
+
         @self.api.route('/api/v1/demo/action', methods = ['POST'])
         def route_action():
             img = self.get_img(request)

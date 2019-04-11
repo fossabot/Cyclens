@@ -63,55 +63,69 @@ class EmotionRecognitionPROC(Processor):
 
         total_success_count = 0
 
-        if len(faces) > 0:
-            for i, face in enumerate(faces):
+        try:
 
-                x, y, w, h = set_offsets(face, (20, 40))
+            if len(faces) > 0:
+                for i, face in enumerate(faces):
 
-                result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'result': 'null', 'success': False}
+                    x, y, w, h = set_offsets(face, (20, 40))
 
-                face_gray = image_gray[w:h, x:y]
+                    result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'result': 'null', 'success': False}
 
-                try:
-                    face_gray = cv2.resize(face_gray, self.MD.emotion_target_size)
-                    #cv2.imshow("a", face_gray)
-                    #cv2.waitKey(1000)
-                    #cv2.destroyAllWindows()
-                except:
-                    continue
+                    face_gray = image_gray[w:h, x:y]
 
-                face_gray = div_255(face_gray, True)
+                    try:
+                        face_gray = cv2.resize(face_gray, self.MD.emotion_target_size)
+                        #cv2.imshow("a", face_gray)
+                        #cv2.waitKey(1000)
+                        #cv2.destroyAllWindows()
+                    except:
+                        continue
 
-                face_gray = np.expand_dims(face_gray, 0)
-                face_gray = np.expand_dims(face_gray, -1)
+                    face_gray = div_255(face_gray, True)
 
-                predict = self.MD.CASC_EMOTION.predict(face_gray)
+                    face_gray = np.expand_dims(face_gray, 0)
+                    face_gray = np.expand_dims(face_gray, -1)
 
-                if predict is not None:
-                    total_success_count += 1
-                    arg = np.argmax(predict)
-                    text = self.MD.EMOTIONS[arg]
+                    predict = self.MD.CASC_EMOTION.predict(face_gray)
 
-                    result_face['result'] = text
-                    result_face['success'] = True
+                    if predict is not None:
+                        total_success_count += 1
+                        arg = np.argmax(predict)
+                        text = self.MD.EMOTIONS[arg]
 
-                    print("Index: {}, Face Position: [{}, {}], Face Size: [{}, {}], Gender: {}".format(i, x, y, w, h, text))
+                        result_face['result'] = text
+                        result_face['success'] = True
 
-                result['faces'].append(result_face)
+                        print("Index: {}, Face Position: [{}, {}], Face Size: [{}, {}], Gender: {}".format(i, x, y, w, h, text))
 
-        if total_success_count != len(faces):
-            msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(len(faces), total_success_count)
-            result['message'] = msg
-            print(msg)
+                    result['faces'].append(result_face)
 
-        rate = len(faces) / total_success_count * 100
+            if total_success_count != len(faces):
+                msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(len(faces), total_success_count)
+                result['message'] = msg
+                print(msg)
+
+            rate = len(faces) / total_success_count * 100
+
+            result['rate'] = rate
+
+            result['success'] = True
+            self.process_successes += 1
+        except:
+            result['success'] = False
+            self.process_fails += 1
+
+        self.total_processed += 1
 
         date_end = get_date_now()
 
+        ms_diff = (date_end - date_start).microseconds / 1000
+
+        self.response_times.append(ms_diff)
+
         result['process']['end'] = get_date_str(date_end)
-        result['process']['total'] = (date_end - date_start).microseconds / 1000
-        result['rate'] = rate
-        result['success'] = True
+        result['process']['total'] = ms_diff
 
         print("Processing success rate: %{}".format(rate))
         print("===========================================================================================")

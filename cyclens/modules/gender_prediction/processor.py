@@ -62,53 +62,66 @@ class GenderPredictionPROC(Processor):
 
         total_success_count = 0
 
-        if len(faces) > 0:
-            for i, face in enumerate(faces):
+        try:
+            if len(faces) > 0:
+                for i, face in enumerate(faces):
 
-                x, y, w, h = set_offsets(face, (30, 60))
+                    x, y, w, h = set_offsets(face, (30, 60))
 
-                result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'result': 'null', 'success': False}
+                    result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'result': 'null', 'success': False}
 
-                face_rgb = image_rgb[w:h, x:y]
+                    face_rgb = image_rgb[w:h, x:y]
 
-                try:
-                    face_rgb = cv2.resize(face_rgb, self.MD.gender_target_size)
-                    # cv2.imshow("a", face_gray)
-                    # cv2.waitKey(1000)
-                    # cv2.destroyAllWindows()
-                except:
-                    continue
+                    try:
+                        face_rgb = cv2.resize(face_rgb, self.MD.gender_target_size)
+                        # cv2.imshow("a", face_gray)
+                        # cv2.waitKey(1000)
+                        # cv2.destroyAllWindows()
+                    except:
+                        continue
 
-                face_rgb = np.expand_dims(face_rgb, 0)
-                face_rgb = div_255(face_rgb, False)
+                    face_rgb = np.expand_dims(face_rgb, 0)
+                    face_rgb = div_255(face_rgb, False)
 
-                predict = self.MD.CASC_GENDER.predict(face_rgb)
+                    predict = self.MD.CASC_GENDER.predict(face_rgb)
 
-                if predict is not None:
-                    total_success_count += 1
-                    arg = np.argmax(predict)
-                    text = self.MD.GENDERS[arg]
+                    if predict is not None:
+                        total_success_count += 1
+                        arg = np.argmax(predict)
+                        text = self.MD.GENDERS[arg]
 
-                    result_face['result'] = text
-                    result_face['success'] = True
+                        result_face['result'] = text
+                        result_face['success'] = True
 
-                    print("Index: {}, Face Position: [{}, {}], Face Size: [{}, {}], Gender: {}".format(i, x, y, w, h, text))
+                        print("Index: {}, Face Position: [{}, {}], Face Size: [{}, {}], Gender: {}".format(i, x, y, w, h, text))
 
-                result['faces'].append(result_face)
+                    result['faces'].append(result_face)
 
-        if total_success_count != len(faces):
-            msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(len(faces), total_success_count)
-            result['message'] = msg
-            print(msg)
+            if total_success_count != len(faces):
+                msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(len(faces), total_success_count)
+                result['message'] = msg
+                print(msg)
 
-        rate = len(faces) / total_success_count * 100
+            rate = len(faces) / total_success_count * 100
+
+            result['rate'] = rate
+
+            result['success'] = True
+            self.process_successes += 1
+        except:
+            result['success'] = False
+            self.process_fails += 1
+
+        self.total_processed += 1
 
         date_end = get_date_now()
 
+        ms_diff = (date_end - date_start).microseconds / 1000
+
+        self.response_times.append(ms_diff)
+
         result['process']['end'] = get_date_str(date_end)
-        result['process']['total'] = (date_end - date_start).microseconds / 1000
-        result['rate'] = rate
-        result['success'] = True
+        result['process']['total'] = ms_diff
 
         print("Processing success rate: %{}".format(rate))
         print("===========================================================================================")

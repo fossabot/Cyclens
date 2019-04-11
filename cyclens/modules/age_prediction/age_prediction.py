@@ -19,6 +19,9 @@ class AgePredictionMD(Module):
         super(AgePredictionMD, self).__init__(ready)
         print("[MODULE::AGE_PREDICTION]: __init__")
 
+        self.module_id = 1
+        self.module_name = 'age_prediction'
+
         _ready = threading.Event()
 
         _ready.clear()

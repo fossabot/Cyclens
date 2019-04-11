@@ -24,6 +24,9 @@ class AgePredictionPROC(Processor):
         super(AgePredictionPROC, self).__init__(module, ready)
         print("[MODULE::AGE_PREDICTION::PROC]: __init__")
 
+        self.processor_id = 1
+        self.processor_name = 'age_prediction'
+
         self._event_ready.set()
 
     def run(self):
@@ -63,62 +66,74 @@ class AgePredictionPROC(Processor):
 
         total_success_count = 0
 
-        if len(faces) > 0:
+        try:
+            if len(faces) > 0:
 
-            face_imgs = np.empty((len(faces), self.MD.face_size, self.MD.face_size, 3))
+                face_imgs = np.empty((len(faces), self.MD.face_size, self.MD.face_size, 3))
 
-            for i, face in enumerate(faces):
+                for i, face in enumerate(faces):
 
-                face_img, cropped = crop_face(image_rgb, face, margin = 40, size = self.MD.face_size)
+                    face_img, cropped = crop_face(image_rgb, face, margin = 40, size = self.MD.face_size)
 
-                # null check ve image.shape checks
-                (x, y, w, h) = cropped
+                    # null check ve image.shape checks
+                    (x, y, w, h) = cropped
 
-                result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'result': 'null', 'success': False}
-                result['faces'].append(result_face)
+                    result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'result': 'null', 'success': False}
+                    result['faces'].append(result_face)
 
-                # print(type(face_img)) # numpy.ndarray
-                # print(type(cropped)) # tuple
+                    # print(type(face_img)) # numpy.ndarray
+                    # print(type(cropped)) # tuple
 
-                face_imgs[i, :, :, :] = face_img
+                    face_imgs[i, :, :, :] = face_img
 
-            if len(face_imgs) > 0:
+                if len(face_imgs) > 0:
 
-                predict = self.MD.CASC_AGE.predict(face_imgs)
+                    predict = self.MD.CASC_AGE.predict(face_imgs)
 
-                if predict is not None:
+                    if predict is not None:
 
-                    predicted_genders = predict[0]
-                    ages = np.arange(0, 101).reshape(101, 1)
-                    predicted_ages = predict[1].dot(ages).flatten()
+                        predicted_genders = predict[0]
+                        ages = np.arange(0, 101).reshape(101, 1)
+                        predicted_ages = predict[1].dot(ages).flatten()
 
-                    for i, face in enumerate(faces):
-                        total_success_count += 1
+                        for i, face in enumerate(faces):
+                            total_success_count += 1
 
-                        age = int(predicted_ages[i])
-                        #gender = "F" if predicted_genders[i][0] > 0.5 else "M"
+                            age = int(predicted_ages[i])
+                            #gender = "F" if predicted_genders[i][0] > 0.5 else "M"
 
-                        result['faces'][i]['result'] = age
-                        result['faces'][i]['success'] = True
+                            result['faces'][i]['result'] = age
+                            result['faces'][i]['success'] = True
 
-                        print("Index: {}, Face Position: [{}, {}], Face Size: [{}, {}], Gender: {}".format(i, x, y, w, h, age))
+                            print("Index: {}, Face Position: [{}, {}], Face Size: [{}, {}], Gender: {}".format(i, x, y, w, h, age))
 
+            if total_success_count != len(faces):
+                msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(len(faces), total_success_count)
+                result['message'] = msg
+                print(msg)
 
+            rate = len(faces) / total_success_count * 100
 
-        if total_success_count != len(faces):
-            msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(len(faces), total_success_count)
-            result['message'] = msg
-            print(msg)
+            result['rate'] = rate
 
-        rate = len(faces) / total_success_count * 100
+            result['success'] = True
+            self.process_successes += 1
+        except:
+            result['success'] = False
+            self.process_fails += 1
+
+        self.total_processed += 1
 
         date_end = get_date_now()
 
-        result['process']['end'] = get_date_str(date_end)
-        result['process']['total'] = (date_end - date_start).microseconds / 1000
-        result['rate'] = rate
-        result['success'] = True
+        ms_diff = (date_end - date_start).microseconds / 1000
 
+        self.response_times.append(ms_diff)
+
+        result['process']['end'] = get_date_str(date_end)
+        result['process']['total'] = ms_diff
+
+        print("Processing success rate: %{}".format(rate))
         print("===========================================================================================")
 
         self.is_busy = False

@@ -11,7 +11,8 @@ import threading
 class Module(threading.Thread):
     """An abstract class for Cyclens modules."""
 
-    module_id : None
+    module_id = -1
+    module_name = 'null'
 
     def __init__(self, ready=None):
         print("[MODULE::BASE]: __init__")
@@ -30,6 +31,12 @@ class Module(threading.Thread):
 
     def stopped(self):
         return self._event_stop.is_set()
+
+    def get_id(self):
+        return self.module_id
+
+    def get_name(self):
+        return self.module_name
 
     def enqueue(self, data):
         if self.process_queue.full():

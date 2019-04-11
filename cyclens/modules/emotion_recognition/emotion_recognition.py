@@ -19,6 +19,9 @@ class EmotionRecognitionMD(Module):
         super(EmotionRecognitionMD, self).__init__(ready)
         print("[MODULE::EMOTION_RECOGNITION]: __init__")
 
+        self.module_id = 2
+        self.module_name = 'emotion_recognition'
+
         _ready = threading.Event()
 
         _ready.clear()
