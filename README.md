@@ -21,6 +21,10 @@
 
 `curl -F "file=@/home/dentrax/Projects/Bitbucket/cyclens-server/tests/images/test3.jpg" http://localhost:5000/api/v1/demo | python -m json.tool | bat -p -l json`
 
+## Camera Capture
+
+`mpv av://v4l2:/dev/video0 --screenshot-template="%F-%wHh%wMm%wSs%wTms"`
+
 ## Common Issues
 
 * `emoticon` değil `emotion` !!!

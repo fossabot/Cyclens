@@ -9,6 +9,8 @@ from tornado.ioloop import IOLoop
 
 import asyncio
 
+from ..common.preprocessor import get_date_now, get_date_str
+
 import json
 import numpy as np
 import cv2
@@ -138,6 +140,51 @@ class ApiServer(threading.Thread):
 
             return self.get_res(res)
 
+        @self.api.route('/api/v1/demo/single', methods = ['POST'])
+        def route_single():
+            date_start = get_date_now()
+
+            img = self.get_img(request)
+
+            result = {'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'modules': []}
+
+            try:
+                proc = self.cyclens.module_ar.do_process(img)
+                proc_data = json.loads(proc)
+                result['modules'].append(proc_data)
+
+                proc = self.cyclens.module_ap.do_process(img)
+                proc_data = json.loads(proc)
+                result['modules'].append(proc_data)
+
+                proc = self.cyclens.module_er.do_process(img)
+                proc_data = json.loads(proc)
+                result['modules'].append(proc_data)
+
+                proc = self.cyclens.module_fr.do_process(img)
+                proc_data = json.loads(proc)
+                result['modules'].append(proc_data)
+
+                proc = self.cyclens.module_gp.do_process(img)
+                proc_data = json.loads(proc)
+                result['modules'].append(proc_data)
+
+                result['success'] = True
+            except:
+                result['success'] = False
+                result['message'] = 'try-except failed!!!'
+
+            date_end = get_date_now()
+
+            ms_diff = (date_end - date_start).total_seconds() * 1000
+
+            result['process']['end'] = get_date_str(date_end)
+            result['process']['total'] = round(ms_diff, 2)
+
+            res = json.dumps(result)
+
+            return self.get_res(res)
+
         @self.api.route('/api/v1/demo/action', methods = ['POST'])
         def route_action():
             img = self.get_img(request)
@@ -163,12 +210,17 @@ class ApiServer(threading.Thread):
             res = self.cyclens.module_fr.do_process(img)
             return self.get_res(res)
 
+        @self.api.route('/api/v1/demo/face_add', methods = ['POST'])
+        def route_face_add():
+            img = self.get_img(request)
+            res = self.cyclens.module_fr.do_face_add(img)
+            return self.get_res(res)
+
         @self.api.route('/api/v1/demo/gender', methods = ['POST'])
         def route_gender():
             img = self.get_img(request)
             res = self.cyclens.module_gp.do_process(img)
             return self.get_res(res)
-
 
     def get_img(self, request):
         data = request.files['file'].read()

@@ -123,7 +123,7 @@ class EmotionRecognitionPROC(Processor):
 
         date_end = get_date_now()
 
-        ms_diff = (date_end - date_start).microseconds / 1000
+        ms_diff = (date_end - date_start).total_seconds() * 1000
 
         self.response_times.append(ms_diff)
 
