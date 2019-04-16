@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 from ...common.module import Module
+from ...common.path_system import create_folder_root, create_folder_id, check_folder_root, get_latest_folder_id, get_latest_face_id_from_folder_id, get_folder_count
 
 import threading
 
@@ -10,8 +11,9 @@ import numpy as np
 import tensorflow as tf
 
 import cv2
-
 import os
+import json
+
 from os.path import isfile
 
 from .processor import FaceRecognitionPROC
@@ -52,16 +54,16 @@ class FaceRecognitionMD(Module):
         # --how_many_training_steps=300
         # --summaries_dir=training_summaries/basic
 
-        if not self.check_face_folder_root(self.DIR_STORE):
-            if self.create_face_folder_root(self.DIR_STORE):
+        if not check_folder_root(self.DIR_STORE):
+            if create_folder_root(self.DIR_STORE):
                 print("---> Face recognition data path created!!!")
             else:
                 print("---> Couldn't create face recognition root path")
                 exit(1)
         else:
-            last = self.get_latest_face_folder_id(self.DIR_STORE)
-            count = self.get_face_folder_count(self.DIR_STORE)
-            print("---> Total Face: {}, Latest ID: {}".format(count, last))
+            last = get_latest_folder_id(self.DIR_STORE)
+            count = get_folder_count(self.DIR_STORE)
+            print("---> Total Folder Count: {}, Latest Folder ID: {}".format(count, last))
             print("---> Face recognition data path exist!!!")
 
         if isfile(detection_model_path):
@@ -173,45 +175,44 @@ class FaceRecognitionMD(Module):
     # Gelen Face'leri Crop yap, işlemden geçir ve klasöre ekle
     def do_face_add(self, data):
         super(FaceRecognitionMD, self).do_process(data)
-        print("[MODULE::FACE_RECOGNITION::DO_PROCESS]:")
+        print("[MODULE::FACE_RECOGNITION::FACE_ADD::DO_PROCESS]:")
 
-        print("[MODULE::FACE_RECOGNITION::PIPELINE]: Sending to PROCESS Pipe")
-        print("[MODULE::FACE_RECOGNITION::PROCESS]: [START]")
-        data = self.processor.process(data)
-        print("[MODULE::FACE_RECOGNITION::PROCESS]: [END] - Result: {}".format(data))
+        print("[MODULE::FACE_RECOGNITION::FACE_ADD::PIPELINE]: Sending to PROCESS Pipe")
+        print("[MODULE::FACE_RECOGNITION::FACE_ADD::PROCESS]: [START]")
+
+        result = {'success': True, 'message': 'null', 'folder_id': 0, 'face_id': 0}
+
+        count = get_folder_count(self.DIR_STORE)
+        print(count)
+
+        if count == 0:
+            create_folder_id(self.DIR_STORE, 1)
+
+        last_id = get_latest_folder_id(self.DIR_STORE)
+        result['folder_id'] = last_id
+
+        if last_id == -1:
+            result['message'] = "Folder id returns -1"
+            result['success'] = False
+        else:
+            face_id = self.add_face_to_folder_id(data, last_id)
+            result['face_id'] = face_id
+
+            if face_id == -1:
+                result['message'] = "Face id returns -1"
+                result['success'] = False
+
+        data = json.dumps(result)
+        print("[MODULE::FACE_RECOGNITION::FACE_ADD::PROCESS]: [END] - Result: {}".format(data))
 
         return data
 
-    def create_face_folder_root(self, path):
-        try:
-            os.makedirs(path)
-            return True
-        except OSError:
-            print("Creation of the directory %s failed" % path)
-        return False
-
-    def check_face_folder_root(self, path):
-        return os.path.isdir(path)
-
-    def add_face_to_folder(self, face, folder_id):
-        pass
-
-    # Dosya adı (ID) en yüksek olanı döndürür
-    def get_latest_face_folder_id(self, path):
-        highest = 0
-        for root, dirs, files in os.walk(os.path.abspath(path), topdown=False):
-            for name in dirs:
-                id = int(name)
-                if id >= highest:
-                    highest = id
-        return highest
-
-    def get_face_folder_count(self, path):
-        count = 0
-        for root, dirs, files in os.walk(os.path.abspath(path), topdown = False):
-            for name in dirs:
-                count += 1
-        return count
+    def add_face_to_folder_id(self, face, folder_id):
+        id = get_latest_face_id_from_folder_id(self.DIR_STORE, folder_id) + 1
+        if id >= 0:
+            cv2.imwrite(os.path.join('{}/{}/'.format(self.DIR_STORE, folder_id), '{}.jpg'.format(id)), face)
+            return id
+        return -1
 
     def print_debug(self, data):
         super(FaceRecognitionMD, self).print_debug(data)
