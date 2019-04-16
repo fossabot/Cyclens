@@ -11,6 +11,7 @@ import tensorflow as tf
 
 import cv2
 
+import os
 from os.path import isfile
 
 from .processor import FaceRecognitionPROC
@@ -31,7 +32,7 @@ class FaceRecognitionMD(Module):
         self.processor = FaceRecognitionPROC(self, _ready)
         _ready.wait()
 
-        self.DIR_STORE = '/tmp/cyclens/face-recognition'
+        self.DIR_STORE = '/tmp/cyclens/face-recognition/'
 
         self.CASC_FACE = None
         self.INCEPTION_MODEL = None
@@ -50,6 +51,18 @@ class FaceRecognitionMD(Module):
         # --image_dir=tf_files/images
         # --how_many_training_steps=300
         # --summaries_dir=training_summaries/basic
+
+        if not self.check_face_folder_root(self.DIR_STORE):
+            if self.create_face_folder_root(self.DIR_STORE):
+                print("---> Face recognition data path created!!!")
+            else:
+                print("---> Couldn't create face recognition root path")
+                exit(1)
+        else:
+            last = self.get_latest_face_folder_id(self.DIR_STORE)
+            count = self.get_face_folder_count(self.DIR_STORE)
+            print("---> Total Face: {}, Latest ID: {}".format(count, last))
+            print("---> Face recognition data path exist!!!")
 
         if isfile(detection_model_path):
             self.CASC_FACE = cv2.CascadeClassifier(detection_model_path)
@@ -169,8 +182,36 @@ class FaceRecognitionMD(Module):
 
         return data
 
+    def create_face_folder_root(self, path):
+        try:
+            os.makedirs(path)
+            return True
+        except OSError:
+            print("Creation of the directory %s failed" % path)
+        return False
+
+    def check_face_folder_root(self, path):
+        return os.path.isdir(path)
+
     def add_face_to_folder(self, face, folder_id):
         pass
+
+    # Dosya adı (ID) en yüksek olanı döndürür
+    def get_latest_face_folder_id(self, path):
+        highest = 0
+        for root, dirs, files in os.walk(os.path.abspath(path), topdown=False):
+            for name in dirs:
+                id = int(name)
+                if id >= highest:
+                    highest = id
+        return highest
+
+    def get_face_folder_count(self, path):
+        count = 0
+        for root, dirs, files in os.walk(os.path.abspath(path), topdown = False):
+            for name in dirs:
+                count += 1
+        return count
 
     def print_debug(self, data):
         super(FaceRecognitionMD, self).print_debug(data)
