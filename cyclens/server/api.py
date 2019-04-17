@@ -70,7 +70,7 @@ class ApiServer(threading.Thread):
     def add_routes(self):
 
 
-        @self.api.route('/api/v1/demo/ping', methods = ['POST'])
+        @self.api.route('/api/v1/demo/ping', methods = ['GET'])
         def route_ping():
             result = {'type': 'ping', 'result': 'pong', 'date': 0}
 
@@ -80,8 +80,7 @@ class ApiServer(threading.Thread):
 
             return self.get_res(res)
 
-
-        @self.api.route('/api/v1/demo/status', methods = ['POST'])
+        @self.api.route('/api/v1/demo/status', methods = ['GET'])
         def status():
 
             result = {'type': 'status', 'modules': []}
