@@ -29,24 +29,36 @@ class ApiServer(threading.Thread):
 
     api = Flask(__name__)
 
-    def __init__(self, cyclens):
-        print("[API]: __init__")
+    def __init__(self, cyclens, ready=None):
         threading.Thread.__init__(self)
 
         self.cyclens = cyclens
 
-    def run(self):
+        self.HOST = 'localhost'
+        self.PORT = 5000
+
         self.add_routes()
-        self.start_api(debug=False, host="localhost", port=5000)
-        print("[API]: run")
+
+        ready.set()
+
+    def run(self):
+        self.start_api(debug=False, host=self.HOST, port=self.PORT)
 
     def start_api(self, debug, host, port):
-        print("[API]: start")
-        #Tonado: non-blocking, asynchronous 
+        #Tonado: non-blocking, asynchronous
         asyncio.set_event_loop(asyncio.new_event_loop())
         http_server = HTTPServer(WSGIContainer(self.api))
         http_server.listen(port)
         IOLoop.instance().start()
+
+    def stop(self):
+        try:
+            func = request.environ.get('werkzeug.server.shutdown')
+            if func is None:
+                raise RuntimeError('Not running with the Werkzeug Server')
+            func()
+        except:
+            print("API shutdown error...")
 
     def is_running(self):
         return True
@@ -54,8 +66,6 @@ class ApiServer(threading.Thread):
     # Test: curl -i -X POST -H "Content-Type: multipart/form-data" -F "file=@/home/dentrax/Pictures/Wallpapers/wp1.jpg" http://localhost:5000/test/demo
     # Test: curl -F "file=@/home/dentrax/Pictures/Wallpapers/wp1.jpg" http://localhost:5000/test/demo
     def add_routes(self):
-        print("[API]: Add routes")
-
         @self.api.route('/api/v1/demo/status', methods = ['POST'])
         def status():
 

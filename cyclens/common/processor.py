@@ -14,7 +14,6 @@ class Processor(threading.Thread):
     """An abstract class for Cyclens module processors."""
 
     def __init__(self, module=None, ready=None):
-        print("[PROCESSOR::BASE]: __init__")
         threading.Thread.__init__(self)
         self.MD = module
         self._thread_lock = threading.Lock()

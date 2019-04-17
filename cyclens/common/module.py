@@ -15,11 +15,9 @@ class Module(threading.Thread):
     module_name = 'null'
 
     def __init__(self, ready=None):
-        print("[MODULE::BASE]: __init__")
         threading.Thread.__init__(self)
         self._event_ready = ready
         self._event_stop = threading.Event()
-        self.process_queue = Queue()
         self.is_running = False
 
     def run(self):
@@ -38,22 +36,7 @@ class Module(threading.Thread):
     def get_name(self):
         return self.module_name
 
-    def enqueue(self, data):
-        if self.process_queue.full():
-            print("[MODULE::ENQUEUE]: Failed to add QUEUE -> FULL")
-            return
-
-        self.process_queue.put(data)
-
-    def dequeue(self):
-        if not self.process_queue.empty():
-            return self.process_queue.get_nowait()
-        return None
-
     def do_process(self, data):
-        print("[MODULE::BASE::ON_DATA_RECEIVED]:")
-        self.enqueue(data)
-
         return None
 
     def print_debug(self, data):

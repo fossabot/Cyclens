@@ -24,7 +24,6 @@ class FaceRecognitionPROC(Processor):
 
     def __init__(self, module=None, ready=None):
         super(FaceRecognitionPROC, self).__init__(module, ready)
-        print("[MODULE::FACE_RECOGNITION::PROC]: __init__")
 
         self._event_ready.set()
 

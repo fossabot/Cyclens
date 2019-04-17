@@ -22,7 +22,6 @@ class AgePredictionPROC(Processor):
 
     def __init__(self, module=None, ready=None):
         super(AgePredictionPROC, self).__init__(module, ready)
-        print("[MODULE::AGE_PREDICTION::PROC]: __init__")
 
         self.processor_id = 1
         self.processor_name = 'age_prediction'

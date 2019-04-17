@@ -23,7 +23,6 @@ class FaceRecognitionMD(Module):
 
     def __init__(self, ready=None):
         super(FaceRecognitionMD, self).__init__(ready)
-        print("[MODULE::FACE_RECOGNITION]: __init__")
 
         self.module_id = 3
         self.module_name = 'face_recognition'

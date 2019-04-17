@@ -19,7 +19,6 @@ class GenderPredictionMD(Module):
 
     def __init__(self, ready=None):
         super(GenderPredictionMD, self).__init__(ready)
-        print("[MODULE::GENDER_PREDICTION]: __init__")
 
         self.module_id = 4
         self.module_name = 'gender_prediction'

@@ -26,11 +26,8 @@ from .Cyclens import Cyclens
 __all__ = ['main', 'Cyclens']
 
 def main(argv=None):
-    try:
-        print('[PROGRAM::MAIN]: Started')
-        cyclens_main(argv)
-    except KeyboardInterrupt:
-        sys.exit('\nERROR: Interrupted by user')
+    print('[PROGRAM::MAIN]: Started')
+    cyclens_main(argv)
 
 
 

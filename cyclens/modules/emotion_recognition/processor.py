@@ -23,7 +23,6 @@ class EmotionRecognitionPROC(Processor):
 
     def __init__(self, module=None, ready=None):
         super(EmotionRecognitionPROC, self).__init__(module, ready)
-        print("[MODULE::EMOTION_RECOGNITION::PROC]: __init__")
 
         self._event_ready.set()
 

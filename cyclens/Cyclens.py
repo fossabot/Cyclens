@@ -2,9 +2,16 @@
 # coding: utf-8
 
 import threading
+import logging
 import time
 import keras
 import sys
+import os
+import signal
+
+from datetime import datetime
+
+import tensorflow as tf
 
 from .modules import get_module
 from .constants import __version__
@@ -39,11 +46,14 @@ class Cyclens(object):
     params = None
 
     def __init__(self, params=None, auto_init=True):
+        print('[CYCLENS::__init__]')
 
         if params is None:
             params = {}
 
-        print('[CYCLENS::__init__]')
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+        tf.get_logger().setLevel(logging.ERROR)
+        tf.logging.set_verbosity(tf.logging.ERROR)
 
     # Her modülün içerisindeki fonksiyon çağırılır ve parametre olarak API request gönderilir
     # TODO: Burası Async olacak?
@@ -56,62 +66,105 @@ class Cyclens(object):
         self.module_gp.on_data_received(data)
 
     @classmethod
-    def run(self):
-        print('\n[CYCLENS::run()]: ===== INITIALIZING API =====')
-        self.api = ApiServer(self)
-        self.api.start()
-        print('[CYCLENS::run()]: ==============================')
+    def print_boot_time(self, date_start, date_end):
+        time_boot = round((date_end - date_start).total_seconds() * 1000, 2)
+        print('---> Boot time: {} ms'.format(time_boot))
 
-        print('\n[CYCLENS::run()]: ===== INITIALIZING SUB-MODULES =====')
+    @classmethod
+    def run(self):
+        print('\n[CYCLENS::run()]: ===== INITIALIZING MODULES =====')
 
         keras.backend.clear_session()
 
         _ready = threading.Event()
 
+        print('\n> Booting: Action Recognition')
+        date_start = datetime.now()
         _ready.clear()
         self.module_ar = ActionRecognitionMD(_ready)
+        self.module_ar.daemon = True
         _ready.wait()
+        date_end = datetime.now()
+        self.print_boot_time(date_start, date_end)
 
+        print('\n> Booting: Age Prediction')
+        date_start = datetime.now()
         _ready.clear()
         self.module_ap = AgePredictionMD(_ready)
+        self.module_ap.daemon = True
         _ready.wait()
+        date_end = datetime.now()
+        self.print_boot_time(date_start, date_end)
 
+        print('\n> Booting: Emotion Recognition')
+        date_start = datetime.now()
         _ready.clear()
         self.module_er = EmotionRecognitionMD(_ready)
+        self.module_er.daemon = True
         _ready.wait()
+        date_end = datetime.now()
+        self.print_boot_time(date_start, date_end)
 
+        print('\n> Booting: Face Recognition')
+        date_start = datetime.now()
         _ready.clear()
         self.module_fr = FaceRecognitionMD(_ready)
+        self.module_fr.daemon = True
         _ready.wait()
+        date_end = datetime.now()
+        self.print_boot_time(date_start, date_end)
 
+        print('\n> Booting: Gender Prediction')
+        date_start = datetime.now()
         _ready.clear()
         self.module_gp = GenderPredictionMD(_ready)
+        self.module_gp.daemon = True
         _ready.wait()
+        date_end = datetime.now()
+        self.print_boot_time(date_start, date_end)
 
-        print('[CYCLENS::run()]: ======================================')
+        print('\n[CYCLENS::run()]: ===== RUNNING MODULES =====')
+        print()
 
-        print('\n[CYCLENS::run()]: ===== RUNNING SUB-MODULES =====')
         self.module_ar.start()
         self.module_ap.start()
         self.module_er.start()
         self.module_fr.start()
         self.module_gp.start()
-        print('[CYCLENS::run()]: =================================')
+
+        print('\n[CYCLENS::run()]: ===== INITIALIZING API =====')
+        print('\n> Booting: Flask API')
+        date_start = datetime.now()
+        _ready.clear()
+        self.api = ApiServer(self, _ready)
+        self.api.daemon = True
+        _ready.wait()
+        date_end = datetime.now()
+        self.print_boot_time(date_start, date_end)
+        self.api.start()
+        print()
+        print('[CYCLENS::run()]: ==============================')
 
         print('\n[CYCLENS::run()]: RUNNING ASYNC TORNADO WSGI SERVER')
-        print('\n[CYCLENS::run()]: Waiting API requests for \'/api/v1/demo\' on port 5000 ...')
+        print('\n[CYCLENS::run()]: Waiting API requests for \'/api/v1/demo/...\' on \'{}:{}\' ...'.format(self.api.HOST, self.api.PORT))
 
         # API'ye istek yapıldı mı sürekli kontrol et
-        # eğer yapılmış ise 'on_data_received' fonksiyonunu çalıştır
-        while self.api.is_running():
-            time.sleep(0.01)
+        try:
+            signal.pause()
+        except:
+            pass
 
-        print('[CYCLENS::run()]: ============================================')
+        # while self.api.is_running():
+        # time.sleep(0.1)
 
-        print('')
+        print()
+        print('[CYCLENS::run()]: ==============================')
+        print()
 
     @classmethod
     def stop(self):
+        self.api.stop()
+
         self.module_ar.stop()
         self.module_ap.stop()
         self.module_er.stop()
@@ -119,13 +172,15 @@ class Cyclens(object):
         self.module_gp.stop()
 
     def __del__(self):
-        print('[CYCLENS::__del__]')
-        sys.exit()
+        # print('[CYCLENS::__del__]')
+        # sys.exit()
+        pass
 
     def __enter__(self):
         print('[CYCLENS::__enter__]')
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        print('[CYCLENS::__exit__]')
+        print('[CYCLENS::__exit__()]: ===== SHUTTING DOWN =====')
+        print()
         self.stop()

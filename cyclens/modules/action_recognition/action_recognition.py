@@ -15,7 +15,6 @@ class ActionRecognitionMD(Module):
 
     def __init__(self, ready=None):
         super(ActionRecognitionMD, self).__init__(ready)
-        print("[MODULE::ACTION_RECOGNITION]: __init__")
 
         self.module_id = 0
         self.module_name = 'action_recognition'

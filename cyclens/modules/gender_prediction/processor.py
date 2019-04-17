@@ -20,7 +20,6 @@ class GenderPredictionPROC(Processor):
 
     def __init__(self, module=None, ready=None):
         super(GenderPredictionPROC, self).__init__(module, ready)
-        print("[MODULE::GENDER_PREDICTION::PROC]: __init__")
 
         self._event_ready.set()
 

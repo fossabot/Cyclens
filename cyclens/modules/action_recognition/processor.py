@@ -22,11 +22,9 @@ class ActionRecognitionPROC(Processor):
 
     def __init__(self):
         Processor.__init__(self)
-        print("[MODULE::ACTION_RECOGNITION::PROC]: __init__")
 
     def __init__(self, module = None, ready = None):
         super(ActionRecognitionPROC, self).__init__(module, ready)
-        print("[MODULE::ACTION_RECOGNITION::PROC]: __init__")
 
         self._event_ready.set()
 
