@@ -11,6 +11,8 @@ import asyncio
 
 from ..common.preprocessor import get_date_now, get_date_str
 
+from datetime import datetime
+
 import json
 import numpy as np
 import cv2
@@ -66,6 +68,19 @@ class ApiServer(threading.Thread):
     # Test: curl -i -X POST -H "Content-Type: multipart/form-data" -F "file=@/home/dentrax/Pictures/Wallpapers/wp1.jpg" http://localhost:5000/test/demo
     # Test: curl -F "file=@/home/dentrax/Pictures/Wallpapers/wp1.jpg" http://localhost:5000/test/demo
     def add_routes(self):
+
+
+        @self.api.route('/api/v1/demo/ping', methods = ['POST'])
+        def route_ping():
+            result = {'type': 'ping', 'result': 'pong', 'date': 0}
+
+            result['date'] = datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%f')
+
+            res = json.dumps(result)
+
+            return self.get_res(res)
+
+
         @self.api.route('/api/v1/demo/status', methods = ['POST'])
         def status():
 
