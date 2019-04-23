@@ -166,6 +166,12 @@ class ApiServer(threading.Thread):
 
         @self.api.route('/api/v1/demo/single', methods = ['POST'])
         def route_single():
+            ar = request.args.get('ar', default = True, type = bool)  # Action Recognition
+            ap = request.args.get('ap', default = True, type = bool)  # Age Prediction
+            er = request.args.get('er', default = True, type = bool)  # Emotion Recognition
+            fr = request.args.get('fr', default = True, type = bool)  # Face Recognition
+            gp = request.args.get('gp', default = True, type = bool)  # Gender Prediction
+
             date_start = get_date_now()
 
             img = self.get_img(request)
@@ -173,30 +179,45 @@ class ApiServer(threading.Thread):
             result = {'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'modules': []}
 
             try:
-                proc = self.cyclens.module_ar.do_process(img)
-                proc_data = json.loads(proc)
-                result['modules'].append(proc_data)
+                flag = False
 
-                proc = self.cyclens.module_ap.do_process(img)
-                proc_data = json.loads(proc)
-                result['modules'].append(proc_data)
+                if ar:
+                    proc_ar = self.cyclens.module_ar.do_process(img)
+                    proc_data_ar = json.loads(proc_ar)
+                    result['modules'].append(proc_data_ar)
+                    flag = True
 
-                proc = self.cyclens.module_er.do_process(img)
-                proc_data = json.loads(proc)
-                result['modules'].append(proc_data)
+                if ap:
+                    proc_ap = self.cyclens.module_ap.do_process(img)
+                    proc_data_ap = json.loads(proc_ap)
+                    result['modules'].append(proc_data_ap)
+                    flag = True
 
-                proc = self.cyclens.module_fr.do_process(img)
-                proc_data = json.loads(proc)
-                result['modules'].append(proc_data)
+                if er:
+                    proc_er = self.cyclens.module_er.do_process(img)
+                    proc_data_er = json.loads(proc_er)
+                    result['modules'].append(proc_data_er)
+                    flag = True
 
-                proc = self.cyclens.module_gp.do_process(img)
-                proc_data = json.loads(proc)
-                result['modules'].append(proc_data)
+                if fr:
+                    proc_fr = self.cyclens.module_fr.do_process(img)
+                    proc_data_fr = json.loads(proc_fr)
+                    result['modules'].append(proc_data_fr)
+                    flag = True
+
+                if gp:
+                    proc_gp = self.cyclens.module_gp.do_process(img)
+                    proc_data_gp = json.loads(proc_gp)
+                    result['modules'].append(proc_data_gp)
+                    flag = True
+
+                if flag is False:
+                    result['message'] = 'No modules are selected to be processed'
 
                 result['success'] = True
             except:
                 result['success'] = False
-                result['message'] = 'try-except failed!!!'
+                result['message'] = 'API TRY-EXCEPT!!!'
 
             date_end = get_date_now()
 
@@ -236,8 +257,55 @@ class ApiServer(threading.Thread):
 
         @self.api.route('/api/v1/demo/face_add', methods = ['POST'])
         def route_face_add():
+            id = request.args.get('id', default = -1, type = int)
+
+            date_start = get_date_now()
+
             img = self.get_img(request)
-            res = self.cyclens.module_fr.do_face_add(img)
+
+            result = {'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'id': 0, 'limit': False}
+
+            # Eğer parametrede 'id' verilmemişse
+            if id == -1:
+                res = self.cyclens.module_fr.do_face_add(img, -1)
+                if res['success']:
+                    folder_id = res['folder_id']
+                    result['id'] = folder_id
+                    result['success'] = True
+                else:
+                    result['success'] = False
+                    result['message'] = res['message']
+
+            # Eğer parametrede 'id' verilmişse
+            elif id >= 0:
+                res = self.cyclens.module_fr.do_face_add(img, id)
+                if res['success']:
+                    folder_id = res['folder_id']
+                    face_id = res['face_id']
+                    result['id'] = folder_id
+
+                    result['limit'] = res['limit']
+                    result['success'] = True
+                else:
+                    result['success'] = False
+                    result['message'] = res['message']
+            else:
+                result['success'] = False
+                result['message'] = 'Given ID should be greater than zero'
+
+            date_end = get_date_now()
+
+            ms_diff = (date_end - date_start).total_seconds() * 1000
+
+            result['process']['end'] = get_date_str(date_end)
+            result['process']['total'] = round(ms_diff, 2)
+
+            res = json.dumps(result)
+            return self.get_res(res)
+
+        @self.api.route('/api/v1/demo/face_train', methods = ['GET'])
+        def route_face_train():
+            res = self.cyclens.module_fr.do_face_train()
             return self.get_res(res)
 
         @self.api.route('/api/v1/demo/gender', methods = ['POST'])

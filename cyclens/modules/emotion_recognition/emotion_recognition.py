@@ -51,6 +51,10 @@ class EmotionRecognitionMD(Module):
             print("---> Couldn't find Emotion data set path")
             exit(1)
 
+        if self.CASC_EMOTION is None:
+            print("---> Must supply EMOTION classifier either through CASC_EMOTION!!!")
+            exit(1)
+
         self._event_ready.set()
 
     def run(self):

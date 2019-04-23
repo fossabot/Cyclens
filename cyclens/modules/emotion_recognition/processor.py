@@ -116,6 +116,7 @@ class EmotionRecognitionPROC(Processor):
             self.process_successes += 1
         except:
             result['success'] = False
+            result['message'] = 'TRY-EXCEPT'
             self.process_fails += 1
 
         self.total_processed += 1

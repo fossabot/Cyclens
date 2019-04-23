@@ -55,6 +55,10 @@ class GenderPredictionMD(Module):
             print("---> Couldn't find Gender data set path")
             exit(1)
 
+        if self.CASC_GENDER is None:
+            print("---> Must supply GENDER classifier either through CASC_GENDER!!!")
+            exit(1)
+
         self._event_ready.set()
 
     def run(self):

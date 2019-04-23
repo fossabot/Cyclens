@@ -50,6 +50,10 @@ class AgePredictionMD(Module):
             print("---> Couldn't find Age data set path")
             exit(1)
 
+        if self.CASC_AGE is None:
+            print("---> Must supply AGE classifier either through CASC_AGE!!!")
+            exit(1)
+
         self._event_ready.set()
 
     def run(self):

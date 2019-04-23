@@ -17,8 +17,10 @@ def create_folder_root(path):
 # Path'ı verilen yere 'folder_id' isimli bir Folder oluşturur
 def create_folder_id(path, folder_id):
     try:
-        os.mkdir('{}/{}'.format(path, folder_id))
-        return True
+        dir = '{}/{}'.format(path, folder_id)
+        if not os.path.isdir(dir):
+            os.mkdir(dir)
+            return True
     except OSError:
         print("Creation of the directory %s failed" % path)
     return False
@@ -46,7 +48,7 @@ def get_latest_folder_id(path):
 # Klasör adı (ID) içerisinde bulunan resimlerden, dosya adı en yüksek olanı döndürür,
 # '-1' döner <--- Yol yoksa
 def get_latest_face_id_from_folder_id(path, folder_id):
-    highest = 0
+    highest = -1
     path_full = '{}/{}'.format(path, folder_id)
     walk = os.walk(os.path.abspath(path_full), topdown = False)
 
