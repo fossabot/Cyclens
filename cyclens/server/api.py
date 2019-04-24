@@ -166,11 +166,11 @@ class ApiServer(threading.Thread):
 
         @self.api.route('/api/v1/demo/single', methods = ['POST'])
         def route_single():
-            ar = request.args.get('ar', default = True, type = bool)  # Action Recognition
-            ap = request.args.get('ap', default = True, type = bool)  # Age Prediction
-            er = request.args.get('er', default = True, type = bool)  # Emotion Recognition
-            fr = request.args.get('fr', default = True, type = bool)  # Face Recognition
-            gp = request.args.get('gp', default = True, type = bool)  # Gender Prediction
+            ar = request.args.get('ar', default = False, type = bool)  # Action Recognition
+            ap = request.args.get('ap', default = False, type = bool)  # Age Prediction
+            er = request.args.get('er', default = False, type = bool)  # Emotion Recognition
+            fr = request.args.get('fr', default = False, type = bool)  # Face Recognition
+            gp = request.args.get('gp', default = False, type = bool)  # Gender Prediction
 
             date_start = get_date_now()
 
@@ -258,12 +258,13 @@ class ApiServer(threading.Thread):
         @self.api.route('/api/v1/demo/face_add', methods = ['POST'])
         def route_face_add():
             id = request.args.get('id', default = -1, type = int)
+            name = request.args.get('name', default = "", type = str)
 
             date_start = get_date_now()
 
             img = self.get_img(request)
 
-            result = {'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'id': 0, 'limit': False}
+            result = {'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'id': 0, 'limit': False, 'added': False}
 
             # Eğer parametrede 'id' verilmemişse
             if id == -1:
@@ -286,6 +287,14 @@ class ApiServer(threading.Thread):
 
                     result['limit'] = res['limit']
                     result['success'] = True
+
+                    exist_name = self.cyclens.module_fr.do_get_name_for_face_id(face_id)
+
+                    if exist_name is "":
+                        if name is not "":
+                            r = self.cyclens.module_fr.do_set_name_for_face_id(face_id)
+                            result['added'] = r
+
                 else:
                     result['success'] = False
                     result['message'] = res['message']
@@ -299,6 +308,8 @@ class ApiServer(threading.Thread):
 
             result['process']['end'] = get_date_str(date_end)
             result['process']['total'] = round(ms_diff, 2)
+
+            print("[MODULE::FACE_RECOGNITION::FACE_ADD::PROCESS]: [END] - Result: {}".format(result))
 
             res = json.dumps(result)
             return self.get_res(res)

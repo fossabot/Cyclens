@@ -257,8 +257,17 @@ class FaceRecognitionMD(Module):
                         result['message'] = "Reached to face limit for id"
                         result['limit'] = True
 
-            print("[MODULE::FACE_RECOGNITION::FACE_ADD::PROCESS]: [END] - Result: {}".format(result))
         return result
+
+    # Verilen Face ID için DB'den Name çekme fonksiyonu
+    def do_set_name_for_face_id(self, id):
+        # TODO: DB operations
+        return True
+
+    # Verilen Face ID için DB'den Name çekme fonksiyonu
+    def do_get_name_for_face_id(self, id):
+        # TODO: DB operations
+        return ""
 
     # Train etmek için
     def do_face_train(self):
