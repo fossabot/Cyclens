@@ -17,6 +17,7 @@ import json
 import pickle
 import math
 import re
+import threading
 
 from os.path import isfile
 from sklearn import neighbors
@@ -239,7 +240,7 @@ class FaceRecognitionMD(Module):
 
                     create_folder_id(self.DIR_STORE, new_id)
 
-                    is_face_limit = get_latest_face_id_from_folder_id(self.DIR_STORE, new_id) >= 5
+                    is_face_limit = get_latest_face_id_from_folder_id(self.DIR_STORE, new_id) >= 0
 
                     result['folder_id'] = new_id
 
@@ -262,12 +263,27 @@ class FaceRecognitionMD(Module):
     # Verilen Face ID için DB'den Name çekme fonksiyonu
     def do_set_name_for_face_id(self, id):
         # TODO: DB operations
+
         return True
 
     # Verilen Face ID için DB'den Name çekme fonksiyonu
     def do_get_name_for_face_id(self, id):
         # TODO: DB operations
-        return ""
+
+        if id == 0:
+            return "Barbara Palvin"
+        elif id == 1:
+            return "Benedict Cumberbatch"
+        elif id == 2:
+            return "Christian Bale"
+        elif id == 3:
+            return "Johnny Depp"
+        elif id == 4:
+            return "Margot Robbie"
+        elif id == 5:
+            return "Scarlett Johansson"
+
+        return "unknown"
 
     # Train etmek için
     def do_face_train(self):

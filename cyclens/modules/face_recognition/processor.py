@@ -101,6 +101,12 @@ class FaceRecognitionPROC(Processor):
 
                     name = pred
 
+                    try:
+                        id = int(name)
+                        name = self.MD.do_get_name_for_face_id(id)
+                    except:
+                        name = "unknown"
+
                     dist = round(closest_distances[0][i][0], 2)
 
                     result_face = {'id': i, 'x': int(x), 'y': int(y), 'bottom': int(bottom), 'right': int(right), 'distance': dist, 'result': name, 'success': True}

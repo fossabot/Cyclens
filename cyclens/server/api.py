@@ -166,11 +166,11 @@ class ApiServer(threading.Thread):
 
         @self.api.route('/api/v1/demo/single', methods = ['POST'])
         def route_single():
-            ar = request.args.get('ar', default = False, type = bool)  # Action Recognition
-            ap = request.args.get('ap', default = False, type = bool)  # Age Prediction
-            er = request.args.get('er', default = False, type = bool)  # Emotion Recognition
-            fr = request.args.get('fr', default = False, type = bool)  # Face Recognition
-            gp = request.args.get('gp', default = False, type = bool)  # Gender Prediction
+            ar = request.args.get('ar', type = bool) and request.values['ar'] == "true"  # Action Recognition
+            ap = request.args.get('ap', type = bool) and request.values['ap'] == "true"  # Age Prediction
+            er = request.args.get('er', type = bool) and request.values['er'] == "true"  # Emotion Recognition
+            fr = request.args.get('fr', type = bool) and request.values['fr'] == "true"  # Face Recognition
+            gp = request.args.get('gp', type = bool) and request.values['gp'] == "true"  # Gender Prediction
 
             date_start = get_date_now()
 
@@ -178,46 +178,46 @@ class ApiServer(threading.Thread):
 
             result = {'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'modules': []}
 
-            try:
-                flag = False
+            #try:
+            flag = False
 
-                if ar:
-                    proc_ar = self.cyclens.module_ar.do_process(img)
-                    proc_data_ar = json.loads(proc_ar)
-                    result['modules'].append(proc_data_ar)
-                    flag = True
+            if ar is True:
+                proc_ar = self.cyclens.module_ar.do_process(img)
+                proc_data_ar = json.loads(proc_ar)
+                result['modules'].append(proc_data_ar)
+                flag = True
 
-                if ap:
-                    proc_ap = self.cyclens.module_ap.do_process(img)
-                    proc_data_ap = json.loads(proc_ap)
-                    result['modules'].append(proc_data_ap)
-                    flag = True
+            if ap is True:
+                proc_ap = self.cyclens.module_ap.do_process(img)
+                proc_data_ap = json.loads(proc_ap)
+                result['modules'].append(proc_data_ap)
+                flag = True
 
-                if er:
-                    proc_er = self.cyclens.module_er.do_process(img)
-                    proc_data_er = json.loads(proc_er)
-                    result['modules'].append(proc_data_er)
-                    flag = True
+            if er is True:
+                proc_er = self.cyclens.module_er.do_process(img)
+                proc_data_er = json.loads(proc_er)
+                result['modules'].append(proc_data_er)
+                flag = True
 
-                if fr:
-                    proc_fr = self.cyclens.module_fr.do_process(img)
-                    proc_data_fr = json.loads(proc_fr)
-                    result['modules'].append(proc_data_fr)
-                    flag = True
+            if fr is True:
+                proc_fr = self.cyclens.module_fr.do_process(img)
+                proc_data_fr = json.loads(proc_fr)
+                result['modules'].append(proc_data_fr)
+                flag = True
 
-                if gp:
-                    proc_gp = self.cyclens.module_gp.do_process(img)
-                    proc_data_gp = json.loads(proc_gp)
-                    result['modules'].append(proc_data_gp)
-                    flag = True
+            if gp is True:
+                proc_gp = self.cyclens.module_gp.do_process(img)
+                proc_data_gp = json.loads(proc_gp)
+                result['modules'].append(proc_data_gp)
+                flag = True
 
-                if flag is False:
-                    result['message'] = 'No modules are selected to be processed'
+            if flag is False:
+                result['message'] = 'No modules are selected to be processed'
 
-                result['success'] = True
-            except:
-                result['success'] = False
-                result['message'] = 'API TRY-EXCEPT!!!'
+            result['success'] = True
+            #except:
+            #    result['success'] = False
+            #    result['message'] = 'API TRY-EXCEPT!!!'
 
             date_end = get_date_now()
 
@@ -290,8 +290,8 @@ class ApiServer(threading.Thread):
 
                     exist_name = self.cyclens.module_fr.do_get_name_for_face_id(face_id)
 
-                    if exist_name is "":
-                        if name is not "":
+                    if exist_name == "unknown":
+                        if name != "":
                             r = self.cyclens.module_fr.do_set_name_for_face_id(face_id)
                             result['added'] = r
 

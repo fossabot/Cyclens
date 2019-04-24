@@ -66,12 +66,27 @@ class Cyclens(object):
         self.module_gp.on_data_received(data)
 
     @classmethod
+    def print_banner(self):
+        print('''
+ ██████╗██╗   ██╗ ██████╗██╗     ███████╗███╗   ██╗███████╗
+██╔════╝╚██╗ ██╔╝██╔════╝██║     ██╔════╝████╗  ██║██╔════╝
+██║      ╚████╔╝ ██║     ██║     █████╗  ██╔██╗ ██║███████╗
+██║       ╚██╔╝  ██║     ██║     ██╔══╝  ██║╚██╗██║╚════██║
+╚██████╗   ██║   ╚██████╗███████╗███████╗██║ ╚████║███████║
+ ╚═════╝   ╚═╝    ╚═════╝╚══════╝╚══════╝╚═╝  ╚═══╝╚══════╝                                                  
+        ''')
+
+    @classmethod
     def print_boot_time(self, date_start, date_end):
         time_boot = round((date_end - date_start).total_seconds() * 1000, 2)
         print('---> Boot time: {} ms'.format(time_boot))
 
     @classmethod
     def run(self):
+        self.print_banner()
+
+        print()
+
         print('\n[CYCLENS::run()]: ===== INITIALIZING MODULES =====')
 
         keras.backend.clear_session()
@@ -133,7 +148,7 @@ class Cyclens(object):
         self.module_gp.start()
 
         print('\n[CYCLENS::run()]: ===== INITIALIZING API =====')
-        print('\n> Booting: Flask API')
+        print('> Booting: Flask API')
         date_start = datetime.now()
         _ready.clear()
         self.api = ApiServer(self, _ready)
