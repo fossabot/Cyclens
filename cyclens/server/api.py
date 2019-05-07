@@ -10,6 +10,7 @@ from tornado.ioloop import IOLoop
 import asyncio
 
 from ..common.preprocessor import get_date_now, get_date_str
+from ..common.api import load_image_file
 
 from datetime import datetime
 
@@ -81,7 +82,7 @@ class ApiServer(threading.Thread):
             return self.get_res(res)
 
         @self.api.route('/api/v1/demo/status', methods = ['GET'])
-        def status():
+        def route_status():
 
             result = {'type': 'status', 'modules': []}
 
@@ -159,6 +160,41 @@ class ApiServer(threading.Thread):
                          'response_time_rms': self.cyclens.module_gp.processor.get_response_time_rms()}
 
             result['modules'].append(result_gp)
+
+            res = json.dumps(result)
+
+            return self.get_res(res)
+
+
+        # NOT
+        # - Yüzleri realtime olarak dosyalara koymak yerine, encoding'i alıp DB'ye koymak?
+        # - Her modül CPU da ayrı bir Core üzerinde çalışsın?
+        # - FR modülü için GPU destekli multiprocess özelliği?
+        # - Yüzleri en baştan eğitmek yerine, her yüz eklemesi bitince kendi içinde train edilsin, diğer train dosyaları ile birleşsin eğer gerekiyorsa?
+        # - Yüz resmini dosyaya kaydetmek yerine, dosyaya yüzün encoding'i kaydetmek?
+
+        @self.api.route('/api/v1/demo/benchmark', methods = ['GET'])
+        def route_benchmark():
+            date_start = get_date_now()
+
+            result = {'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'round': 0, 'modules': []}
+
+            imgs = [load_image_file('../tests/images/benchmark/bruteforce_0.jpg'), load_image_file('../tests/images/benchmark/bruteforce_1.jpeg'), load_image_file('../tests/images/benchmark/bruteforce_2.jpeg')]
+
+            TOTAL = 10
+
+            result['round'] = TOTAL
+
+            result = self.do_benchmark('age_prediction', imgs, result)
+            result = self.do_benchmark('emotion_recognition', imgs, result)
+            result = self.do_benchmark('face_recognition', imgs, result)
+            result = self.do_benchmark('gender_prediction', imgs, result)
+
+            date_end = get_date_now()
+            ms_diff = (date_end - date_start).total_seconds() * 1000
+
+            result['process']['end'] = get_date_str(date_end)
+            result['process']['total'] = round(ms_diff, 2)
 
             res = json.dumps(result)
 
@@ -260,54 +296,11 @@ class ApiServer(threading.Thread):
             id = request.args.get('id', default = -1, type = int)
             name = request.args.get('name', default = "", type = str)
 
-            date_start = get_date_now()
-
             img = self.get_img(request)
 
-            result = {'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'id': 0, 'limit': False, 'added': False}
+            result = {'success': False, 'message': 'null', 'process': {'start': 0, 'end': 0, 'total': 0}, 'id': 0, 'limit': False, 'added': False}
 
-            # Eğer parametrede 'id' verilmemişse
-            if id == -1:
-                res = self.cyclens.module_fr.do_face_add(img, -1)
-                if res['success']:
-                    folder_id = res['folder_id']
-                    result['id'] = folder_id
-                    result['success'] = True
-                else:
-                    result['success'] = False
-                    result['message'] = res['message']
-
-            # Eğer parametrede 'id' verilmişse
-            elif id >= 0:
-                res = self.cyclens.module_fr.do_face_add(img, id)
-                if res['success']:
-                    folder_id = res['folder_id']
-                    face_id = res['face_id']
-                    result['id'] = folder_id
-
-                    result['limit'] = res['limit']
-                    result['success'] = True
-
-                    exist_name = self.cyclens.module_fr.do_get_name_for_face_id(face_id)
-
-                    if exist_name == "unknown":
-                        if name != "":
-                            r = self.cyclens.module_fr.do_set_name_for_face_id(face_id)
-                            result['added'] = r
-
-                else:
-                    result['success'] = False
-                    result['message'] = res['message']
-            else:
-                result['success'] = False
-                result['message'] = 'Given ID should be greater than zero'
-
-            date_end = get_date_now()
-
-            ms_diff = (date_end - date_start).total_seconds() * 1000
-
-            result['process']['end'] = get_date_str(date_end)
-            result['process']['total'] = round(ms_diff, 2)
+            result = self.do_faceadd(img, id, name, result)
 
             print("[MODULE::FACE_RECOGNITION::FACE_ADD::PROCESS]: [END] - Result: {}".format(result))
 
@@ -324,6 +317,104 @@ class ApiServer(threading.Thread):
             img = self.get_img(request)
             res = self.cyclens.module_gp.do_process(img)
             return self.get_res(res)
+
+    def do_benchmark(self, module_name, imgs, result):
+        date_start = get_date_now()
+
+        module = {'module': module_name, 'success': True, 'FPS': 0, 'MS': 0, 'MS_EST': 0, 'MS_STD': 0, 'MS_RMS': 0}
+
+        total_face_processed = 0
+        total_ms_processed = 0
+
+        if module_name == "age_prediction":
+            mod = self.cyclens.module_ap
+        elif module_name == "emotion_recognition":
+            mod = self.cyclens.module_er
+        elif module_name == "face_recognition":
+            mod = self.cyclens.module_fr
+        elif module_name == "gender_prediction":
+            mod = self.cyclens.module_gp
+        else:
+            raise Exception('Unexpected module name: {}', module_name)
+
+        for i in range(result['round']):
+
+            for j in range(0, len(imgs)):
+
+                proc = mod.do_process(imgs[j])
+
+                proc_data = json.loads(proc)
+
+                module['success'] = module['success'] and proc_data['success']
+
+                total_face_processed += len(proc_data['faces'])
+                total_ms_processed += proc_data['process']['total']
+
+        date_end = get_date_now()
+
+        if total_face_processed is not 0:
+            module['FPS'] = round(1000 * total_face_processed / total_ms_processed, 2)
+            module['MS'] = round((date_end - date_start).total_seconds() * 1000)
+            module['MS_EST'] = mod.processor.get_response_time_estimated()
+            module['MS_STD'] = mod.processor.get_response_time_std()
+            module['MS_RMS'] = mod.processor.get_response_time_rms()
+        else:
+            module['success'] = False
+
+        result['modules'].append(module)
+        result['success'] = result['success'] and module['success']
+
+        return result
+
+    def do_faceadd(self, img, id, name, result):
+        date_start = get_date_now()
+
+        result['process']['start'] = get_date_str(date_start)
+
+        # Eğer parametrede 'id' verilmemişse
+        if id == -1:
+            res = self.cyclens.module_fr.do_face_add(img, -1)
+            if res['success']:
+                folder_id = res['folder_id']
+                result['id'] = folder_id
+                result['success'] = True
+            else:
+                result['success'] = False
+                result['message'] = res['message']
+
+        # Eğer parametrede 'id' verilmişse
+        elif id >= 0:
+            res = self.cyclens.module_fr.do_face_add(img, id)
+            if res['success']:
+                folder_id = res['folder_id']
+                face_id = res['face_id']
+                result['id'] = folder_id
+
+                result['limit'] = res['limit']
+                result['success'] = True
+
+                exist_name = self.cyclens.module_fr.do_get_name_for_face_id(face_id)
+
+                if exist_name == "unknown":
+                    if name != "":
+                        r = self.cyclens.module_fr.do_set_name_for_face_id(face_id)
+                        result['added'] = r
+
+            else:
+                result['success'] = False
+                result['message'] = res['message']
+        else:
+            result['success'] = False
+            result['message'] = 'Given ID should be greater than zero'
+
+        date_end = get_date_now()
+
+        ms_diff = (date_end - date_start).total_seconds() * 1000
+
+        result['process']['end'] = get_date_str(date_end)
+        result['process']['total'] = round(ms_diff, 2)
+
+        return result
 
     def get_img(self, request):
         data = request.files['file'].read()

@@ -17,7 +17,6 @@ if __package__ is None and not hasattr(sys, 'frozen'):
 import cyclens
 
 if __name__ == '__main__':
-    print('[MAIN]: Stated')
     cyclens.main()
     print('\n[MAIN]: Reached end of the application!')
     exit(0)

@@ -46,8 +46,6 @@ class Cyclens(object):
     params = None
 
     def __init__(self, params=None, auto_init=True):
-        print('[CYCLENS::__init__]')
-
         if params is None:
             params = {}
 
@@ -192,7 +190,6 @@ class Cyclens(object):
         pass
 
     def __enter__(self):
-        print('[CYCLENS::__enter__]')
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):

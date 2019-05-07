@@ -26,14 +26,11 @@ from .Cyclens import Cyclens
 __all__ = ['main', 'Cyclens']
 
 def main(argv=None):
-    print('[PROGRAM::MAIN]: Started')
     cyclens_main(argv)
 
 
 
 def cyclens_main(argv=None):
-    print('[CYCLENS::MAIN]: Started')
-
     with Cyclens(None) as cyc:
 
         cyc.run()
