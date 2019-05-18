@@ -321,7 +321,7 @@ class ApiServer(threading.Thread):
     def do_benchmark(self, module_name, imgs, result):
         date_start = get_date_now()
 
-        module = {'module': module_name, 'success': True, 'FPS': 0, 'MS': 0, 'MS_EST': 0, 'MS_STD': 0, 'MS_RMS': 0}
+        module = {'module': module_name, 'success': True, 'FACES': 0, 'FPS': 0, 'MS': 0, 'MS_EST': 0, 'MS_STD': 0, 'MS_RMS': 0}
 
         total_face_processed = 0
         total_ms_processed = 0
@@ -353,6 +353,7 @@ class ApiServer(threading.Thread):
         date_end = get_date_now()
 
         if total_face_processed is not 0:
+            module['FACES'] = total_face_processed
             module['FPS'] = round(1000 * total_face_processed / total_ms_processed, 2)
             module['MS'] = round((date_end - date_start).total_seconds() * 1000)
             module['MS_EST'] = mod.processor.get_response_time_estimated()

@@ -162,15 +162,6 @@ class FaceRecognitionMD(Module):
 
         return knn_clf
 
-    def read_tensor_from_cv2(self, data, input_height = 299, input_width = 299, input_mean = 0, input_std = 255):
-        float_caster = tf.cast(data, tf.float32)
-        dims_expander = tf.expand_dims(float_caster, 0)
-        resized = tf.image.resize_bilinear(dims_expander, [input_height, input_width])
-        normalized = tf.divide(tf.subtract(resized, [input_mean]), [input_std])
-        sess = tf.Session()
-        result = sess.run(normalized)
-        return result
-
     def run(self):
         super(FaceRecognitionMD, self).run()
         print("[MODULE::FACE_RECOGNITION]: run()")
@@ -240,7 +231,9 @@ class FaceRecognitionMD(Module):
 
                     create_folder_id(self.DIR_STORE, new_id)
 
-                    is_face_limit = get_latest_face_id_from_folder_id(self.DIR_STORE, new_id) >= 0
+                    FACE_LIMIT = 2
+
+                    is_face_limit = get_latest_face_id_from_folder_id(self.DIR_STORE, new_id) >= FACE_LIMIT
 
                     result['folder_id'] = new_id
 
