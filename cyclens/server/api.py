@@ -374,7 +374,7 @@ class ApiServer(threading.Thread):
 
         # Eğer parametrede 'id' verilmemişse
         if id == -1:
-            res = self.cyclens.module_fr.do_face_add(img, -1)
+            res = self.cyclens.module_fr.do_face_add_solr(img, -1)
             if res['success']:
                 folder_id = res['folder_id']
                 result['id'] = folder_id
@@ -385,7 +385,7 @@ class ApiServer(threading.Thread):
 
         # Eğer parametrede 'id' verilmişse
         elif id >= 0:
-            res = self.cyclens.module_fr.do_face_add(img, id)
+            res = self.cyclens.module_fr.do_face_add_solr(img, id)
             if res['success']:
                 folder_id = res['folder_id']
                 face_id = res['face_id']

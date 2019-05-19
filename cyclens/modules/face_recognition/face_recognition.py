@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 from ...common.module import Module
 from ...common.path_system import create_folder_root, create_folder_id, check_folder_root, get_latest_folder_id, get_latest_face_id_from_folder_id, get_folder_count
 from ...common.api import load_image_file, face_locations, face_encodings
+from ...constants import SOLR_URL
 
 import threading
 
@@ -15,6 +16,7 @@ import cv2
 import os
 import json
 import pickle
+import pysolr
 import math
 import re
 import threading
@@ -26,6 +28,8 @@ from .processor import FaceRecognitionPROC
 
 
 class FaceRecognitionMD(Module):
+
+    SOLR_VALUE_PREFIX = 'v_'
 
     def __init__(self, ready=None):
         super(FaceRecognitionMD, self).__init__(ready)
@@ -55,6 +59,9 @@ class FaceRecognitionMD(Module):
 
         detection_model_path = '../data/models/detection/haarcascade_frontalface_default.xml'
         knn_model_path = '../data/models/face/trained_knn_model.clf'
+
+        # TODO: if server down and 400 code handling
+        self.SOLR = pysolr.Solr(SOLR_URL, always_commit=True, timeout=1)
 
         if not check_folder_root(self.DIR_STORE):
             if create_folder_root(self.DIR_STORE):
@@ -250,6 +257,50 @@ class FaceRecognitionMD(Module):
                     else:
                         result['message'] = "Reached to face limit for id"
                         result['limit'] = True
+
+        return
+
+    def do_face_add_solr(self, data, id):
+
+        result = {'success': True, 'message': 'null', 'found': 0, 'folder_id': 0, 'face_id': 0, 'limit': False}
+
+        image_rgb = cv2.cvtColor(data, cv2.COLOR_BGR2RGB)
+
+        x_face_locations = face_locations(image_rgb)
+
+        result['found'] = len(x_face_locations)
+
+        if len(x_face_locations) <= 0:
+            result['success'] = False
+            result['message'] = 'There is no face to process'
+            return json.dumps(result)
+
+        if len(x_face_locations) > 1:
+            result['success'] = False
+            result['message'] = 'There are more than one face!'
+            return json.dumps(result)
+
+        if len(x_face_locations) == 1:
+
+            data_solr = {}
+
+            # Find encodings for faces in the face
+            faces_encodings = face_encodings(image_rgb, known_face_locations = x_face_locations)[0]
+
+            # Use the Apache Solr to add the face
+
+            data_solr['name'] = 'hohoho'
+
+            for i, val in enumerate(faces_encodings):
+                idx = '{}{}'.format(self.SOLR_VALUE_PREFIX, str(i))
+                data_solr[idx] = val
+
+            try:
+                self.SOLR.add([data_solr])
+                result['success'] = True
+            except pysolr.SolrError as e:
+                result['success'] = False
+                result['message'] = str(e)
 
         return result
 

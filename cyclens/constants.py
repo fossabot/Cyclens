@@ -57,3 +57,10 @@ HTTP_HEADER_X_REQUESTED_WITH = 'X-Requested-With'
 
 CONTENT_TYPE_JSON = 'application/json'
 CONTENT_TYPE_TEXT_PLAIN = 'text/plain'
+
+####################################
+# [APACHE::SOLR]
+####################################
+
+SOLR_URL = 'http://localhost:8983/solr/cyclens'
+
