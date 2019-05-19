@@ -153,7 +153,7 @@ class FaceRecognitionPROC(Processor):
 
         date_start = get_date_now()
 
-        result = {'module': 'face_recognition', 'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0, 'locations': 0, 'encodings': 0, 'search': 0}, 'found': 0, 'rate': 0, 'faces': []}
+        result = {'module': 'face_recognition', 'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0, 'locations': 0, 'encodings': 0, 'search': 0}, 'found': 0, 'rate': 0, 'close': '', 'faces': []}
 
         image_rgb = cv2.cvtColor(data, cv2.COLOR_BGR2RGB)
 
@@ -181,6 +181,9 @@ class FaceRecognitionPROC(Processor):
                 process_ms_encodings = 0
                 process_ms_searches = 0
 
+                top_name = ''
+                top_dist = 1.0
+
                 for i in range(len(x_face_locations)):
 
                     # Find encodings for faces in the test iamge
@@ -204,19 +207,27 @@ class FaceRecognitionPROC(Processor):
 
                     process_ms_searches += round((date_end_search - date_start_search).total_seconds() * 1000, 2)
 
+                    print(searches)
+
                     # TODO: searches 0. mı?
                     for search in searches:
-                        name = search['name']
-                        dist = round(search[query], 2)
-
-                        if dist >= 0.5:
+                        try:
+                            name = search['name']
+                            dist = round(search[query], 2)
+                        except KeyError as e:
                             name = 'unknown'
+                            dist = 10.0
+
+                        if dist < top_dist:
+                            top_dist = dist
+                            top_name = name
 
                         result_face = {'name': name, 'dist': dist}
                         result['faces'].append(result_face)
+
                         print(search)
 
-
+                result['close'] = top_name
                 result['process']['encodings'] = process_ms_encodings
                 result['process']['search'] = process_ms_searches
 

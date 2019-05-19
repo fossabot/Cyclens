@@ -264,7 +264,7 @@ class FaceRecognitionMD(Module):
 
         return
 
-    def do_face_add_solr(self, data, id):
+    def do_face_add_solr(self, data, name):
 
         result = {'success': True, 'message': 'null', 'found': 0, 'folder_id': 0, 'face_id': 0, 'limit': False}
 
@@ -293,7 +293,10 @@ class FaceRecognitionMD(Module):
 
             # Use the Apache Solr to add the face
 
-            data_solr['name'] = 'hohoho'
+            if name is "":
+                name = "unknown"
+
+            data_solr['name'] = name
 
             for i, val in enumerate(faces_encodings):
                 idx = '{}{}'.format(self.SOLR_VALUE_PREFIX, str(i))
