@@ -63,6 +63,10 @@ class FaceRecognitionMD(Module):
         # TODO: if server down and 400 code handling
         self.SOLR = pysolr.Solr(SOLR_URL, always_commit=True, timeout=1)
 
+        self.SOLR_QUERY_DIST = 'dist(2,'
+        for i in range(0, 128):
+            self.SOLR_QUERY_DIST += 'v_{},'.format(str(i))
+
         if not check_folder_root(self.DIR_STORE):
             if create_folder_root(self.DIR_STORE):
                 print("---> Face recognition data path created!!!")

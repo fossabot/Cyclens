@@ -10,7 +10,7 @@ from ...common.api import load_image_file, face_locations, face_encodings, face_
 
 import time
 import json
-
+import pysolr
 import cv2
 
 
@@ -35,7 +35,7 @@ class FaceRecognitionPROC(Processor):
         print("[MODULE::FACE_RECOGNITION::PROC]: stop()")
         return
 
-    def process(self, data):
+    def process2(self, data):
         super(FaceRecognitionPROC, self).process(data)
 
         date_start = get_date_now()
@@ -130,6 +130,107 @@ class FaceRecognitionPROC(Processor):
         #    result['success'] = False
         #    result['message'] = 'TRY-EXCEPT'
         #    self.process_fails += 1
+
+        self.total_processed += 1
+
+        date_end = get_date_now()
+
+        ms_diff = (date_end - date_start).total_seconds() * 1000
+
+        self.response_times.append(ms_diff)
+
+        result['process']['end'] = get_date_str(date_end)
+        result['process']['total'] = round(ms_diff, 2)
+
+        print("===========================================================================================")
+
+        self.is_busy = False
+
+        return json.dumps(result)
+
+    def process(self, data):
+        super(FaceRecognitionPROC, self).process(data)
+
+        date_start = get_date_now()
+
+        result = {'module': 'face_recognition', 'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0, 'locations': 0, 'encodings': 0, 'search': 0}, 'found': 0, 'rate': 0, 'faces': []}
+
+        image_rgb = cv2.cvtColor(data, cv2.COLOR_BGR2RGB)
+
+        date_start_locations = get_date_now()
+        x_face_locations = face_locations(image_rgb)
+        date_end_locations = get_date_now()
+
+        result['process']['locations'] = round((date_end_locations - date_start_locations).total_seconds() * 1000, 2)
+
+        result['found'] = len(x_face_locations)
+
+        if len(x_face_locations) <= 0:
+            result['success'] = False
+            result['message'] = 'There is no face to process'
+            return json.dumps(result)
+
+        print("[MODULE::FACE_RECOGNITION::RESULT]=====================================================================================")
+        print("Total faces found: {}".format(len(x_face_locations)))
+
+        distance_threshold = 0.6
+
+        try:
+            if len(x_face_locations) >= 1:
+
+                process_ms_encodings = 0
+                process_ms_searches = 0
+
+                for i in range(len(x_face_locations)):
+
+                    # Find encodings for faces in the test iamge
+
+                    date_start_encodings = get_date_now()
+                    faces_encodings = face_encodings(image_rgb, known_face_locations = x_face_locations)[i]
+                    date_end_encodings = get_date_now()
+
+                    process_ms_encodings += round((date_end_encodings - date_start_encodings).total_seconds() * 1000, 2)
+
+                    query = self.MD.SOLR_QUERY_DIST
+
+                    for i, val in enumerate(faces_encodings):
+                        query += '{},'.format(str(val))
+
+                    query += ')'
+
+                    date_start_search = get_date_now()
+                    searches = self.MD.SOLR.search(q = '*:*', sort = query + ' asc', fl = 'name,' + query)
+                    date_end_search = get_date_now()
+
+                    process_ms_searches += round((date_end_search - date_start_search).total_seconds() * 1000, 2)
+
+                    # TODO: searches 0. mı?
+                    for search in searches:
+                        name = search['name']
+                        dist = round(search[query], 2)
+
+                        if dist >= 0.5:
+                            name = 'unknown'
+
+                        result_face = {'name': name, 'dist': dist}
+                        result['faces'].append(result_face)
+                        print(search)
+
+
+                result['process']['encodings'] = process_ms_encodings
+                result['process']['search'] = process_ms_searches
+
+            rate = 100
+
+            print("Processing success rate: %{}".format(rate))
+
+            result['rate'] = rate
+            result['success'] = True
+            self.process_successes += 1
+        except pysolr.SolrError as e:
+            result['success'] = False
+            result['message'] = str(e)
+            self.process_fails += 1
 
         self.total_processed += 1
 
