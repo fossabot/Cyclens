@@ -213,7 +213,7 @@ class FaceRecognitionPROC(Processor):
                     for search in searches:
                         try:
                             name = search['name']
-                            dist = round(search[query], 2)
+                            dist = round(1.0 - search[query], 2)
                         except KeyError as e:
                             name = 'unknown'
                             dist = 10.0
@@ -222,12 +222,12 @@ class FaceRecognitionPROC(Processor):
                             top_dist = dist
                             top_name = name
 
-                        result_face = {'name': name, 'dist': dist}
+                        result_face = {'result': name, 'confidence': dist}
                         result['faces'].append(result_face)
 
                         print(search)
 
-                result['close'] = top_name
+                result['result'] = top_name
                 result['process']['encodings'] = process_ms_encodings
                 result['process']['search'] = process_ms_searches
 
