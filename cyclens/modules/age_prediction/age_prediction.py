@@ -69,14 +69,7 @@ class AgePredictionMD(Module):
 
     def do_process(self, data):
         super(AgePredictionMD, self).do_process(data)
-        print("[MODULE::AGE_PREDICTION::DO_PROCESS]:")
-
-        print("[MODULE::AGE_PREDICTION::PIPELINE]: Sending to PROCESS Pipe")
-        print("[MODULE::AGE_PREDICTION::PROCESS]: [START]")
-        data = self.processor.process(data)
-        print("[MODULE::AGE_PREDICTION::PROCESS]: [END] - Result: {}".format(data))
-
-        return data
+        return self.processor.process(data)
 
     def print_debug(self, data):
         super(AgePredictionMD, self).print_debug(data)

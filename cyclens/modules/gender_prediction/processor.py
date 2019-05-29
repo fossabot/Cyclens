@@ -9,6 +9,7 @@ from ...common.processor import Processor
 
 import cv2
 import numpy as np
+import sys
 import json
 
 from ...utils import (
@@ -35,99 +36,59 @@ class GenderPredictionPROC(Processor):
     def process(self, data):
         super(GenderPredictionPROC, self).process(data)
 
-        date_start = get_date_now()
-
-        # Response dönecek olan JSON objesi
-        result = {'module': 'gender_prediction', 'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'found': 0, 'rate': 0, 'faces': []}
-
-        if data is None:
-            result['success'] = False
-            result['message'] = 'There is no data to process'
-            return json.dumps(result)
-
-        image_gray = cv2.cvtColor(data, cv2.COLOR_BGR2GRAY)
-        image_rgb = cv2.cvtColor(data, cv2.COLOR_BGR2RGB)
-
-        faces = self.MD.CASC_FACE.detectMultiScale(image_gray, scaleFactor=1.3, minNeighbors=5)
-        result['found'] = len(faces)
-
-        if len(faces) <= 0:
-            result['success'] = False
-            result['message'] = 'There is no face to process'
-            return json.dumps(result)
-
-        print("[MODULE::GENDER_PREDICTION::RESULT]=====================================================================================")
-        print("Total faces found: {}".format(len(faces)))
-
         total_success_count = 0
 
         try:
-            if len(faces) > 0:
-                for i, face in enumerate(faces):
+            for i, face in enumerate(data['frame_faces']):
 
-                    x, y, w, h = set_offsets(face, (30, 60))
+                x, y, w, h = set_offsets(face, (30, 60))
 
-                    result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'confidence': 0, 'result': 'null', 'success': False}
+                result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'confidence': 0, 'result': 'null', 'success': False}
 
-                    face_rgb = image_rgb[w:h, x:y]
+                face_rgb = data['frame_rgb'][w:h, x:y]
 
-                    try:
-                        face_rgb = cv2.resize(face_rgb, self.MD.gender_target_size)
-                        # cv2.imshow("a", face_gray)
-                        # cv2.waitKey(1000)
-                        # cv2.destroyAllWindows()
-                    except:
-                        continue
+                try:
+                    face_rgb = cv2.resize(face_rgb, self.MD.gender_target_size)
+                    # cv2.imshow("a", face_gray)
+                    # cv2.waitKey(1000)
+                    # cv2.destroyAllWindows()
+                except:
+                    continue
 
-                    face_rgb = np.expand_dims(face_rgb, 0)
-                    face_rgb = div_255(face_rgb, False)
+                face_rgb = np.expand_dims(face_rgb, 0)
+                face_rgb = div_255(face_rgb, False)
 
-                    predict = self.MD.CASC_GENDER.predict(face_rgb)
+                predict = self.MD.CASC_GENDER.predict(face_rgb)
 
-                    if predict is not None:
-                        total_success_count += 1
-                        confidence = np.max(predict)
-                        arg = np.argmax(predict)
-                        text = self.MD.GENDERS[arg]
+                if predict is not None:
+                    total_success_count += 1
+                    confidence = np.max(predict)
+                    arg = np.argmax(predict)
+                    text = self.MD.GENDERS[arg]
 
-                        result_face['confidence'] = round(float(confidence), 2)
-                        result_face['result'] = text
-                        result_face['success'] = True
+                    result_face['confidence'] = round(float(confidence), 2)
+                    result_face['result'] = text
+                    result_face['success'] = True
 
-                        print("Index: {}, Face Position: [{}, {}], Face Size: [{}, {}], Gender: {}".format(i, x, y, w, h, text))
+                data['faces'].append(result_face)
 
-                    result['faces'].append(result_face)
+            if total_success_count != data['found']:
+                msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(data['found'], total_success_count)
+                data['message'] = msg
 
-            if total_success_count != len(faces):
-                msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(len(faces), total_success_count)
-                result['message'] = msg
-                print(msg)
+            rate = data['found'] / total_success_count * 100
 
-            rate = len(faces) / total_success_count * 100
-
-            print("Processing success rate: %{}".format(rate))
-
-            result['rate'] = rate
-            result['success'] = True
+            data['rate'] = rate
+            data['success'] = True
             self.process_successes += 1
+
         except:
-            result['success'] = False
-            result['message'] = 'TRY-EXCEPT'
+            data['success'] = False
+            data['message'] = ('Type: {}, Message: {}', sys.exc_info()[0], e)
             self.process_fails += 1
 
         self.total_processed += 1
 
-        date_end = get_date_now()
-
-        ms_diff = (date_end - date_start).total_seconds() * 1000
-
-        self.response_times.append(ms_diff)
-
-        result['process']['end'] = get_date_str(date_end)
-        result['process']['total'] = round(ms_diff, 2)
-
-        print("===========================================================================================")
-
         self.is_busy = False
 
-        return json.dumps(result)
+        return data

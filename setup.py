@@ -27,6 +27,7 @@ except ImportError:
     setuptools_available = False
 
 from .cyclens import (
+    __version__,
     __appname__,
     __license__,
     __url__,
@@ -51,10 +52,10 @@ from .cyclens import (
 # ===============
 
 setup(
+    version         = __version__,
     name            = __appname__,
     license         = __license__,
     url             = __url__,
-    version         = constants.__version__,
     author          = __author__,
     author_email    = __authormail__,
     maintainer      = __maintainer__,

@@ -12,9 +12,11 @@ import signal
 from datetime import datetime
 
 import tensorflow as tf
+import json
+import copy
 
-from .modules import get_module
-from .constants import __version__
+from .common.preprocessor import PreProcessor, get_date_now, get_date_str
+from .common.postprocessor import PostProcessor
 from .server import ApiServer
 
 from .modules.action_recognition.action_recognition import ActionRecognitionMD
@@ -53,16 +55,6 @@ class Cyclens(object):
         tf.get_logger().setLevel(logging.ERROR)
         tf.logging.set_verbosity(tf.logging.ERROR)
 
-    # Her modülün içerisindeki fonksiyon çağırılır ve parametre olarak API request gönderilir
-    # TODO: Burası Async olacak?
-    @classmethod
-    def on_data_received(self, data):
-        self.module_ar.on_data_received(data)
-        self.module_ap.on_data_received(data)
-        self.module_er.on_data_received(data)
-        self.module_fr.on_data_received(data)
-        self.module_gp.on_data_received(data)
-
     @classmethod
     def print_banner(self):
         print('''
@@ -90,6 +82,12 @@ class Cyclens(object):
         keras.backend.clear_session()
 
         _ready = threading.Event()
+
+        self.pre_processor = PreProcessor()
+        self.pre_processor.load()
+
+        self.post_processor = PostProcessor()
+        self.post_processor.load()
 
         print('\n> Booting: Action Recognition')
         date_start = datetime.now()
@@ -173,6 +171,104 @@ class Cyclens(object):
         print()
         print('[CYCLENS::run()]: ==============================')
         print()
+
+    @classmethod
+    def process(self, img, ar, ap, er, fr, gp):
+
+        date_start = get_date_now()
+
+        result = {'success': True, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'modules': []}
+
+        print('\n[API Request at: {}] ======================================================================================'.format(get_date_str(date_start)))
+
+        if ar is False and ap is False and er is False and fr is False and gp is False:
+
+            result['success'] = False
+            result['message'] = 'No modules are selected to be processed'
+
+        else:
+
+            # try:
+
+            data = self.pre_processor.process(img)
+
+            if data['success'] is True:
+
+                if ar is True:
+                    data['module'] = 'action_recognition'
+
+                    proc_ar = self.module_ar.do_process(copy.deepcopy(data))
+                    proc_ar_post = self.post_processor.process(self.module_ar, proc_ar)
+                    proc_data_ar = json.loads(proc_ar_post)
+
+                    result['modules'].append(proc_data_ar)
+
+                    print('[MODULE::ACTION_RECOGNITION::RESULT]: {}'.format(proc_data_ar))
+
+                if ap is True:
+                    data['module'] = 'age_prediction'
+
+                    proc_ap = self.module_ap.do_process(copy.deepcopy(data))
+                    proc_ap_post = self.post_processor.process(self.module_ap, proc_ap)
+                    proc_data_ap = json.loads(proc_ap_post)
+
+                    result['modules'].append(proc_data_ap)
+
+                    print('[MODULE::AGE_PREDICTION::RESULT]: {}'.format(proc_data_ap))
+
+                if er is True:
+                    data['module'] = 'emotion_recognition'
+
+                    proc_er = self.module_er.do_process(copy.deepcopy(data))
+                    proc_er_post = self.post_processor.process(self.module_er, proc_er)
+                    proc_data_er = json.loads(proc_er_post)
+
+                    result['modules'].append(proc_data_er)
+
+                    print('[MODULE::EMOTION_RECOGNITION::RESULT]: {}'.format(proc_data_er))
+
+                if fr is True:
+                    data['module'] = 'face_recognition'
+
+                    proc_fr = self.module_fr.do_process(copy.deepcopy(data))
+                    proc_fr_post = self.post_processor.process(self.module_fr, proc_fr)
+                    proc_data_fr = json.loads(proc_fr_post)
+
+                    result['modules'].append(proc_data_fr)
+
+                    print('[MODULE::FACE_RECOGNITION::RESULT]: {}'.format(proc_data_fr))
+
+                if gp is True:
+                    data['module'] = 'gender_prediction'
+
+                    proc_gp = self.module_gp.do_process(copy.deepcopy(data))
+                    proc_gp_post = self.post_processor.process(self.module_gp, proc_gp)
+                    proc_data_gp = json.loads(proc_gp_post)
+
+                    result['modules'].append(proc_data_gp)
+
+                    print('[MODULE::GENDER_PREDICTION::RESULT]: {}'.format(proc_data_gp))
+
+
+
+            else:
+                result['success'] = data['success']
+                result['message'] = data['message']
+
+            # except:
+            #    result['success'] = False
+            #    result['message'] = 'API TRY-EXCEPT!!!'
+
+        date_end = get_date_now()
+
+        ms_diff = (date_end - date_start).total_seconds() * 1000
+
+        result['process']['end'] = get_date_str(date_end)
+        result['process']['total'] = round(ms_diff, 2)
+
+        print('[Elapsed time: {}] ======================================================================================'.format(result['process']['total']))
+
+        return result
 
     @classmethod
     def stop(self):

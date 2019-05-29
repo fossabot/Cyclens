@@ -8,9 +8,56 @@ from datetime import datetime
 
 import cv2
 import numpy as np
+import json
+
+from os.path import isfile
 
 from multiprocessing import Process, Queue
 import threading
+
+
+class PreProcessor:
+
+    def __init__(self):
+        self.detection_model_path = '../data/models/detection/haarcascade_frontalface_default.xml'
+        self.CASC_FACE = None
+
+    def load(self):
+        if isfile(self.detection_model_path):
+            self.CASC_FACE = cv2.CascadeClassifier(self.detection_model_path)
+            print("---> Face detection data set Loaded!!!")
+        else:
+            print("---> Couldn't find cascade model")
+            exit(1)
+
+    def process(self, data):
+        result = {'success': True, 'module': '', 'message': 'null', 'process': {'start': 0, 'end': 0, 'total': 0}, 'found': 0, 'rate': 0, 'faces': [], 'frame_faces': None, 'frame_gray': None, 'frame_rgb': None}
+
+        result['process']['start'] = datetime.now()
+
+        if data is None:
+            result['success'] = False
+            result['message'] = 'There is no data to process'
+            return result
+
+        frame = cv2.resize(data, (0, 0), fx = 0.25, fy = 0.25)
+
+        image_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        result['frame_gray'] = image_gray
+        result['frame_rgb'] = image_rgb
+
+        result['frame_faces'] = self.CASC_FACE.detectMultiScale(image_gray, scaleFactor = 1.3, minNeighbors = 5)
+
+        result['found'] = len(result['frame_faces'])
+
+        if len(result['frame_faces']) <= 0:
+            result['success'] = False
+            result['message'] = 'There is no face to process'
+            return result
+
+        return result
 
 
 def div_255(x, v2 = True):

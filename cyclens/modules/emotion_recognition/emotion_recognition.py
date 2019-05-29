@@ -70,14 +70,7 @@ class EmotionRecognitionMD(Module):
 
     def do_process(self, data):
         super(EmotionRecognitionMD, self).do_process(data)
-        print("[MODULE::EMOTICON_RECOGNITION::DO_PROCESS]:")
-
-        print("[MODULE::EMOTION_RECOGNITION::PIPELINE]: Sending to PROCESS Pipe")
-        print("[MODULE::EMOTION_RECOGNITION::PROCESS]: [START]")
-        data = self.processor.process(data)
-        print("[MODULE::EMOTION_RECOGNITION::PROCESS]: [END] - Result: {}".format(data))
-
-        return data
+        return self.processor.process(data)
 
     def print_debug(self, data):
         super(EmotionRecognitionMD, self).print_debug(data)

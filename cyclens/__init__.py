@@ -9,6 +9,7 @@ import sys
 
 from .info import (
     __appname__,
+    __version__,
     __license__,
     __url__,
     __author__,

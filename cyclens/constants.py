@@ -3,18 +3,6 @@
 """Constants used by Cyclens modules."""
 
 ####################################
-# [VERSION]
-####################################
-
-VERSION_MAJOR = 0
-VERSION_MINOR = 0
-VERSION_PATCH = '0.dev0'
-
-__short_version__ = '{}.{}'.format(VERSION_MAJOR, VERSION_MINOR)
-__version__ = '{}.{}'.format(__short_version__, VERSION_PATCH)
-
-
-####################################
 # [PYTHON]
 ####################################
 

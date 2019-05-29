@@ -14,6 +14,7 @@ from __future__ import unicode_literals
 from datetime import datetime as dt
 
 __appname__ = 'Cyclens'
+__version__ = '1.0'
 __license__ = 'Apache License 2.0'
 __url__ = 'https://bitbucket.org/bw-src/src-server'
 

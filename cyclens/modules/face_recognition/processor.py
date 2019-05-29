@@ -173,7 +173,7 @@ class FaceRecognitionPROC(Processor):
         print("[MODULE::FACE_RECOGNITION::RESULT]=====================================================================================")
         print("Total faces found: {}".format(len(x_face_locations)))
 
-        distance_threshold = 0.6
+        distance_threshold = 0.5
 
         try:
             if len(x_face_locations) >= 1:
@@ -207,9 +207,8 @@ class FaceRecognitionPROC(Processor):
 
                     process_ms_searches += round((date_end_search - date_start_search).total_seconds() * 1000, 2)
 
-                    print(searches)
-
                     # TODO: searches 0. mı?
+                    # FIXME: for 1 kez dönüyor tek face için
                     for search in searches:
                         try:
                             name = search['name']
@@ -221,19 +220,15 @@ class FaceRecognitionPROC(Processor):
                         if dist < top_dist:
                             top_dist = dist
                             top_name = name
+                        if dist >= distance_threshold:
+                            result_face = {'result': name, 'confidence': dist}
+                            result['faces'].append(result_face)
+                            result['result'] = top_name
 
-                        result_face = {'result': name, 'confidence': dist}
-                        result['faces'].append(result_face)
-
-                        print(search)
-
-                result['result'] = top_name
                 result['process']['encodings'] = process_ms_encodings
                 result['process']['search'] = process_ms_searches
 
             rate = 100
-
-            print("Processing success rate: %{}".format(rate))
 
             result['rate'] = rate
             result['success'] = True

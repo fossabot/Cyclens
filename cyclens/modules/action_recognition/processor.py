@@ -40,12 +40,7 @@ class ActionRecognitionPROC(Processor):
     def process(self, data):
         super(ActionRecognitionPROC, self).process(data)
 
-        result = {'module': 'action_recognition', 'success': False, 'message': 'null', 'found': 0, 'rate': 0, 'faces': []}
-
-        if data is None:
-            result['success'] = False
-            result['message'] = 'There is no data to process'
-            return json.dumps(result)
+        result = data
 
         result['success'] = False
         result['message'] = 'Not implemented yet'

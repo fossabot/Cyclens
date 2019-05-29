@@ -74,14 +74,7 @@ class GenderPredictionMD(Module):
 
     def do_process(self, data):
         super(GenderPredictionMD, self).do_process(data)
-        print("[MODULE::GENDER_PREDICTION::DO_PROCESS]:")
-
-        print("[MODULE::GENDER_PREDICTION::PIPELINE]: Sending to PROCESS Pipe")
-        print("[MODULE::GENDER_PREDICTION::PROCESS]: [START]")
-        data = self.processor.process(data)
-        print("[MODULE::GENDER_PREDICTION::PROCESS]: [END] - Result: {}".format(data))
-
-        return data
+        return self.processor.process(data)
 
     def print_debug(self, data):
         super(GenderPredictionMD, self).print_debug(data)

@@ -14,22 +14,28 @@ _ALL_CLASSES = [
     if name.endswith('MD') and name != 'GenericMD'
 ]
 
+
 def get_preprocessor(key):
     return globals()[key + 'PREP']
+
 
 def get_processor(key):
     return globals()[key + 'PROC']
 
+
 def get_postprocessor(key):
     return globals()[key + 'POSP']
+
 
 def gen_modules_classes():
     """ Return a list of supported modules. """
     return _ALL_CLASSES
 
+
 def gen_modules():
     """ Return a list of an instance of every supported modules. """
     return [klass() for klass in gen_modules_classes()]
+
 
 def get_module(md_name):
     """Returns the info module class with the given md_name"""

@@ -51,14 +51,7 @@ class ActionRecognitionMD(Module):
 
     def do_process(self, data):
         super(ActionRecognitionMD, self).do_process(data)
-        print("[MODULE::ACTION_RECOGNITION::DO_PROCESS]:")
-
-        print("[MODULE::ACTION_RECOGNITION::PIPELINE]: Sending to PROCESS Pipe")
-        print("[MODULE::ACTION_RECOGNITION::PROCESS]: [START]")
-        data = self.processor.process(data)
-        print("[MODULE::ACTION_RECOGNITION::PROCESS]: [END] - Result: {}".format(data))
-
-        return data
+        self.processor.process(data)
 
     def print_debug(self, data):
         super(ActionRecognitionMD, self).print_debug(data)
