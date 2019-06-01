@@ -58,7 +58,7 @@ class AgePredictionMD(Module):
 
         self.processor.stop()
 
-    def do_process(self, data):
+    async def do_process(self, data):
         super(AgePredictionMD, self).do_process(data)
         return self.processor.process(data)
 

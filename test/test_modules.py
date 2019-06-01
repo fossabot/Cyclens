@@ -25,28 +25,29 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 class TestModuleER(unittest.TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
         tf.get_logger().setLevel(logging.ERROR)
         tf.logging.set_verbosity(tf.logging.ERROR)
 
         _ready = threading.Event()
 
-        self.pre_processor = PreProcessor()
-        self.loaded = self.pre_processor.try_load()
-        self.post_processor = PostProcessor()
-        self.loaded = self.post_processor.try_load()
+        cls.pre_processor = PreProcessor()
+        cls.loaded = cls.pre_processor.try_load()
+        cls.post_processor = PostProcessor()
+        cls.loaded = cls.post_processor.try_load()
 
         _ready.clear()
-        self.module_ap = AgePredictionMD(_ready)
+        cls.module_ap = AgePredictionMD(_ready)
         _ready.wait()
 
         _ready.clear()
-        self.module_er = EmotionRecognitionMD(_ready)
+        cls.module_er = EmotionRecognitionMD(_ready)
         _ready.wait()
 
         _ready.clear()
-        self.module_gp = GenderPredictionMD(_ready)
+        cls.module_gp = GenderPredictionMD(_ready)
         _ready.wait()
 
     def test_module_ap_cascade_not_null(self):
@@ -75,7 +76,7 @@ class TestModuleER(unittest.TestCase):
             self.assertEqual(pre['found'], 1)
             self.assertTrue(pre['success'])
 
-            res = self.module_ap.do_process(pre)
+            res = yield self.module_ap.do_process(pre)
 
             self.assertEqual(pre['message'], 'null')
             self.assertEqual(res['found'], 1)
@@ -94,7 +95,7 @@ class TestModuleER(unittest.TestCase):
             self.assertEqual(pre['found'], 1)
             self.assertTrue(pre['success'])
 
-            res = self.module_er.do_process(pre)
+            res = yield self.module_er.do_process(pre)
 
             self.assertEqual(pre['message'], 'null')
             self.assertEqual(res['found'], 1)
@@ -113,7 +114,7 @@ class TestModuleER(unittest.TestCase):
             self.assertEqual(pre['found'], 1)
             self.assertTrue(pre['success'])
 
-            res = self.module_gp.do_process(pre)
+            res = yield self.module_gp.do_process(pre)
 
             self.assertEqual(pre['message'], 'null')
             self.assertEqual(res['found'], 1)

@@ -63,7 +63,7 @@ class GenderPredictionMD(Module):
 
         self.processor.stop()
 
-    def do_process(self, data):
+    async def do_process(self, data):
         super(GenderPredictionMD, self).do_process(data)
         return self.processor.process(data)
 

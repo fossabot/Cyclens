@@ -6,18 +6,24 @@ from __future__ import unicode_literals
 
 from multiprocessing import Process, Queue
 
+from .postprocessor import PostProcessor
+
 import threading
 
-class Module(threading.Thread):
+
+class Module():
     """An abstract class for Cyclens modules."""
 
     module_id = -1
     module_name = 'null'
 
     def __init__(self, ready=None):
-        threading.Thread.__init__(self)
         self._event_ready = ready
         self._event_stop = threading.Event()
+
+        self.post_processor = PostProcessor()
+        self.post_processor.try_load()
+
         self.is_running = False
 
     def run(self):

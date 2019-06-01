@@ -20,7 +20,7 @@ class PostProcessor:
 
         if data is None:
             result = {'success': False, 'message': 'There is no data for post-processor'}
-            return json.dumps(result)
+            return result
 
         date_end = datetime.now()
 
@@ -37,12 +37,12 @@ class PostProcessor:
         if module is None:
             data['success'] = False
             data['message'] = 'There is no data for post-processor'
-            return json.dumps(data)
+            return data
 
         if module is not None and module is not 'test':
             module.processor.response_times.append(ms_diff)
 
-        return json.dumps(data)
+        return data
 
 
 def get_date_str(date):

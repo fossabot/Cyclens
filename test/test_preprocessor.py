@@ -15,9 +15,10 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 class TestPreProcessor(unittest.TestCase):
 
-    def setUp(self):
-        self.processor = PreProcessor()
-        self.loaded = self.processor.try_load()
+    @classmethod
+    def setUpClass(cls):
+        cls.processor = PreProcessor()
+        cls.loaded = cls.processor.try_load()
 
     def test_processor_loaded(self):
         self.assertTrue(self.loaded)

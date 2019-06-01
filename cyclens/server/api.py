@@ -28,6 +28,7 @@ headerJPEG = {'Content-Type': 'image/jpeg'}
 
 global stream
 
+
 class ApiServer(threading.Thread):
 
     api = Flask(__name__)

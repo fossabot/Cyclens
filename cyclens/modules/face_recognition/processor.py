@@ -39,6 +39,8 @@ class FaceRecognitionPROC(Processor):
     def process2(self, data):
         super(FaceRecognitionPROC, self).process(data)
 
+        data['module'] = self.MD.module_name
+
         date_start = get_date_now()
 
         result = {'module': 'face_recognition', 'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'found': 0, 'rate': 0, 'faces': []}
@@ -152,6 +154,8 @@ class FaceRecognitionPROC(Processor):
     def process(self, data):
         super(FaceRecognitionPROC, self).process(data)
 
+        data['module'] = self.MD.module_name
+
         total_success_count = 0
 
         date_start_locations = get_date_now()
@@ -167,88 +171,90 @@ class FaceRecognitionPROC(Processor):
             data['message'] = 'There is no face to process'
             return data
 
-        print("[MODULE::FACE_RECOGNITION::RESULT]=====================================================================================")
-        print("Total faces found: {}".format(len(x_face_locations)))
-
         distance_threshold = 0.5
 
-        try:
-            if len(x_face_locations) >= 1:
+        if data['found'] > 0:
 
-                process_ms_encodings = 0
-                process_ms_searches = 0
+            try:
+                if len(x_face_locations) >= 1:
 
-                top_name = ''
-                top_dist = 1.0
+                    process_ms_encodings = 0
+                    process_ms_searches = 0
 
-                for i in range(len(x_face_locations)):
+                    top_name = ''
+                    top_dist = 1.0
 
-                    # Find encodings for faces in the test iamge
+                    for i in range(len(x_face_locations)):
 
-                    date_start_encodings = get_date_now()
-                    faces_encodings = face_encodings(data['frame_rgb'], known_face_locations = x_face_locations)[i]
-                    date_end_encodings = get_date_now()
+                        # Find encodings for faces in the test iamge
 
-                    process_ms_encodings += round((date_end_encodings - date_start_encodings).total_seconds() * 1000, 2)
+                        date_start_encodings = get_date_now()
+                        faces_encodings = face_encodings(data['frame_rgb'], known_face_locations = x_face_locations)[i]
+                        date_end_encodings = get_date_now()
 
-                    query = self.MD.SOLR_QUERY_DIST
+                        process_ms_encodings += round((date_end_encodings - date_start_encodings).total_seconds() * 1000, 2)
 
-                    for i, val in enumerate(faces_encodings):
-                        query += '{},'.format(str(val))
+                        query = self.MD.SOLR_QUERY_DIST
 
-                    query += ')'
+                        for i, val in enumerate(faces_encodings):
+                            query += '{},'.format(str(val))
 
-                    date_start_search = get_date_now()
-                    searches = self.MD.SOLR.search(q = '*:*', sort = query + ' asc', fl = 'name,' + query)
-                    date_end_search = get_date_now()
+                        query += ')'
 
-                    process_ms_searches += round((date_end_search - date_start_search).total_seconds() * 1000, 2)
+                        date_start_search = get_date_now()
+                        searches = self.MD.SOLR.search(q = '*:*', sort = query + ' asc', fl = 'name,' + query)
+                        date_end_search = get_date_now()
 
-                    # if searches query result != 0 ->
-                    total_success_count += 1
+                        process_ms_searches += round((date_end_search - date_start_search).total_seconds() * 1000, 2)
 
-                    # TODO: searches 0. mı?
-                    # FIXME: for 1 kez dönüyor tek face için
-                    for search in searches:
-                        try:
-                            name = search['name']
-                            dist = round(1.0 - search[query], 2)
-                        except KeyError as e:
-                            name = 'unknown'
-                            dist = 10.0
+                        # if searches query result != 0 ->
+                        total_success_count += 1
 
-                        result_face = {'result': name, 'confidence': dist}
-                        data['faces'].append(result_face)
+                        # TODO: searches 0. mı?
+                        # FIXME: for 1 kez dönüyor tek face için
+                        for search in searches:
+                            try:
+                                name = search['name']
+                                dist = round(1.0 - search[query], 2)
+                            except KeyError as e:
+                                name = 'unknown'
+                                dist = 10.0
 
-                        if dist < top_dist:
-                            top_dist = dist
-                            top_name = name
-                        if dist >= distance_threshold:
-                            data['result'] = top_name
+                            result_face = {'result': name, 'confidence': dist}
+                            data['faces'].append(result_face)
 
-                data['process']['encodings'] = process_ms_encodings
-                data['process']['search'] = process_ms_searches
+                            if dist < top_dist:
+                                top_dist = dist
+                                top_name = name
+                            if dist >= distance_threshold:
+                                data['result'] = top_name
 
-            if total_success_count != data['found']:
-                msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(data['found'], total_success_count)
-                data['message'] = msg
+                    data['process']['encodings'] = process_ms_encodings
+                    data['process']['search'] = process_ms_searches
 
-            rate = data['found'] / total_success_count * 100
+                if total_success_count != data['found']:
+                    msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(data['found'], total_success_count)
+                    data['message'] = msg
 
-            data['rate'] = rate
-            data['success'] = True
-            self.process_successes += 1
-        except pysolr.SolrError as e:
-            data['success'] = False
-            data['message'] = str(e)
-            self.process_fails += 1
-        except:
-            data['success'] = False
-            data['message'] = ('Type: {}, Message: TRY-EXCEPT', sys.exc_info()[0])
-            self.process_fails += 1
+                if total_success_count > 0:
+                    rate = data['found'] / total_success_count * 100
+                    data['rate'] = rate
+                else:
+                    data['rate'] = 0
 
-        self.total_processed += 1
+                data['success'] = True
+                self.process_successes += 1
+            except pysolr.SolrError as e:
+                data['success'] = False
+                data['message'] = str(e)
+                self.process_fails += 1
+            except:
+                data['success'] = False
+                data['message'] = ('Type: {}, Message: TRY-EXCEPT', sys.exc_info()[0])
+                self.process_fails += 1
+
+            self.total_processed += 1
 
         self.is_busy = False
 
-        return data
+        return self.MD.post_processor.process(self.MD, data)

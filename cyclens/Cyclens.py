@@ -14,9 +14,10 @@ from datetime import datetime
 import tensorflow as tf
 import json
 import copy
+import asyncio
+import nest_asyncio
 
 from .common.preprocessor import PreProcessor, get_date_now, get_date_str
-from .common.postprocessor import PostProcessor
 from .server import ApiServer
 
 from .modules.action_recognition.action_recognition import ActionRecognitionMD
@@ -80,6 +81,7 @@ class Cyclens(object):
         print('\n[CYCLENS::run()]: ===== INITIALIZING MODULES =====')
 
         keras.backend.clear_session()
+        nest_asyncio.apply()
 
         _ready = threading.Event()
 
@@ -90,14 +92,10 @@ class Cyclens(object):
             print('\n> PreProcessor: Unable to load cascade classifier!')
             exit(1)
 
-        self.post_processor = PostProcessor()
-        self.post_processor.try_load()
-
         print('\n> Booting: Action Recognition')
         date_start = datetime.now()
         _ready.clear()
         self.module_ar = ActionRecognitionMD(_ready)
-        self.module_ar.daemon = True
         _ready.wait()
         date_end = datetime.now()
         self.print_boot_time(date_start, date_end)
@@ -106,7 +104,6 @@ class Cyclens(object):
         date_start = datetime.now()
         _ready.clear()
         self.module_ap = AgePredictionMD(_ready)
-        self.module_ap.daemon = True
         _ready.wait()
         date_end = datetime.now()
         self.print_boot_time(date_start, date_end)
@@ -115,7 +112,6 @@ class Cyclens(object):
         date_start = datetime.now()
         _ready.clear()
         self.module_er = EmotionRecognitionMD(_ready)
-        self.module_er.daemon = True
         _ready.wait()
         date_end = datetime.now()
         self.print_boot_time(date_start, date_end)
@@ -124,7 +120,6 @@ class Cyclens(object):
         date_start = datetime.now()
         _ready.clear()
         self.module_fr = FaceRecognitionMD(_ready)
-        self.module_fr.daemon = True
         _ready.wait()
         date_end = datetime.now()
         self.print_boot_time(date_start, date_end)
@@ -133,19 +128,12 @@ class Cyclens(object):
         date_start = datetime.now()
         _ready.clear()
         self.module_gp = GenderPredictionMD(_ready)
-        self.module_gp.daemon = True
         _ready.wait()
         date_end = datetime.now()
         self.print_boot_time(date_start, date_end)
 
         print('\n[CYCLENS::run()]: ===== RUNNING MODULES =====')
         print()
-
-        self.module_ar.start()
-        self.module_ap.start()
-        self.module_er.start()
-        self.module_fr.start()
-        self.module_gp.start()
 
         print('\n[CYCLENS::run()]: ===== INITIALIZING API =====')
         print('> Booting: Flask API')
@@ -198,60 +186,36 @@ class Cyclens(object):
 
             if data['success'] is True and data['found'] > 0:
 
+                loop = asyncio.get_event_loop()
+
+                tasks = []
+
                 if ar is True:
-                    data['module'] = 'action_recognition'
-
-                    proc_ar = self.module_ar.do_process(copy.deepcopy(data))
-                    proc_ar_post = self.post_processor.process(self.module_ar, proc_ar)
-                    proc_data_ar = json.loads(proc_ar_post)
-
-                    result['modules'].append(proc_data_ar)
-
-                    print('[MODULE::ACTION_RECOGNITION::RESULT]: {}'.format(proc_data_ar))
+                    proc_ar = loop.create_task(self.module_ar.do_process(copy.deepcopy(data)))
+                    tasks.append(proc_ar)
 
                 if ap is True:
-                    data['module'] = 'age_prediction'
-
-                    proc_ap = self.module_ap.do_process(copy.deepcopy(data))
-                    proc_ap_post = self.post_processor.process(self.module_ap, proc_ap)
-                    proc_data_ap = json.loads(proc_ap_post)
-
-                    result['modules'].append(proc_data_ap)
-
-                    print('[MODULE::AGE_PREDICTION::RESULT]: {}'.format(proc_data_ap))
+                    proc_ap = loop.create_task(self.module_ap.do_process(copy.deepcopy(data)))
+                    tasks.append(proc_ap)
 
                 if er is True:
-                    data['module'] = 'emotion_recognition'
-
-                    proc_er = self.module_er.do_process(copy.deepcopy(data))
-                    proc_er_post = self.post_processor.process(self.module_er, proc_er)
-                    proc_data_er = json.loads(proc_er_post)
-
-                    result['modules'].append(proc_data_er)
-
-                    print('[MODULE::EMOTION_RECOGNITION::RESULT]: {}'.format(proc_data_er))
+                    proc_er = loop.create_task(self.module_er.do_process(copy.deepcopy(data)))
+                    tasks.append(proc_er)
 
                 if fr is True:
-                    data['module'] = 'face_recognition'
-
-                    proc_fr = self.module_fr.do_process(copy.deepcopy(data))
-                    proc_fr_post = self.post_processor.process(self.module_fr, proc_fr)
-                    proc_data_fr = json.loads(proc_fr_post)
-
-                    result['modules'].append(proc_data_fr)
-
-                    print('[MODULE::FACE_RECOGNITION::RESULT]: {}'.format(proc_data_fr))
+                    proc_fr = loop.create_task(self.module_fr.do_process(copy.deepcopy(data)))
+                    tasks.append(proc_fr)
 
                 if gp is True:
-                    data['module'] = 'gender_prediction'
+                    proc_gp = loop.create_task(self.module_gp.do_process(copy.deepcopy(data)))
+                    tasks.append(proc_gp)
 
-                    proc_gp = self.module_gp.do_process(copy.deepcopy(data))
-                    proc_gp_post = self.post_processor.process(self.module_gp, proc_gp)
-                    proc_data_gp = json.loads(proc_gp_post)
+                results, _ = loop.run_until_complete(asyncio.wait(tasks))
 
-                    result['modules'].append(proc_data_gp)
-
-                    print('[MODULE::GENDER_PREDICTION::RESULT]: {}'.format(proc_data_gp))
+                for res in results:
+                    r = res.result()
+                    result['modules'].append(r)
+                    print('[MODULE::{}::RESULT]: {}'.format(r['module'], r))
 
             else:
                 result['success'] = data['success']
@@ -267,6 +231,8 @@ class Cyclens(object):
 
         result['process']['end'] = get_date_str(date_end)
         result['process']['total'] = round(ms_diff, 2)
+
+        print(result)
 
         print('[Elapsed time: {}] ============================================================================================================='.format(result['process']['total']))
 

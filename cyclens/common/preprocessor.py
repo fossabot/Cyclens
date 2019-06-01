@@ -45,7 +45,7 @@ class PreProcessor:
             result['message'] = 'There is no data to process'
             return result
 
-        frame = cv2.resize(data, (0, 0), fx = 0.25, fy = 0.25)
+        frame = cv2.resize(data, (0, 0), fx = 0.30, fy = 0.30)
 
         h, w = frame.shape[:2]
 

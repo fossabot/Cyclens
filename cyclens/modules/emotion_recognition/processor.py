@@ -10,6 +10,7 @@ from ...common.processor import Processor
 
 import cv2
 import numpy as np
+import traceback
 import sys
 import json
 
@@ -38,6 +39,8 @@ class EmotionRecognitionPROC(Processor):
 
     def process(self, data):
         super(EmotionRecognitionPROC, self).process(data)
+
+        data['module'] = self.MD.module_name
 
         total_success_count = 0
 
@@ -84,18 +87,21 @@ class EmotionRecognitionPROC(Processor):
                     msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(data['found'], total_success_count)
                     data['message'] = msg
 
-                rate = data['found'] / total_success_count * 100
+                if total_success_count > 0:
+                    rate = data['found'] / total_success_count * 100
+                    data['rate'] = rate
+                else:
+                    data['rate'] = 0
 
-                data['rate'] = rate
                 data['success'] = True
                 self.process_successes += 1
             except:
                 data['success'] = False
-                data['message'] = ('Type: {}, Message: TRY-EXCEPT', sys.exc_info()[0])
+                data['message'] = 'Type: {}, Message: TRY-EXCEPT', traceback.format_exc()
                 self.process_fails += 1
 
             self.total_processed += 1
 
         self.is_busy = False
 
-        return data
+        return self.MD.post_processor.process(self.MD, data)
