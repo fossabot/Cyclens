@@ -12,6 +12,7 @@ import time
 import json
 import pysolr
 import cv2
+import sys
 
 
 from ...utils import (
@@ -151,24 +152,20 @@ class FaceRecognitionPROC(Processor):
     def process(self, data):
         super(FaceRecognitionPROC, self).process(data)
 
-        date_start = get_date_now()
-
-        result = {'module': 'face_recognition', 'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0, 'locations': 0, 'encodings': 0, 'search': 0}, 'found': 0, 'rate': 0, 'close': '', 'faces': []}
-
-        image_rgb = cv2.cvtColor(data, cv2.COLOR_BGR2RGB)
+        total_success_count = 0
 
         date_start_locations = get_date_now()
-        x_face_locations = face_locations(image_rgb)
+        x_face_locations = face_locations(data['frame_rgb'])
         date_end_locations = get_date_now()
 
-        result['process']['locations'] = round((date_end_locations - date_start_locations).total_seconds() * 1000, 2)
+        data['process']['locations'] = round((date_end_locations - date_start_locations).total_seconds() * 1000, 2)
 
-        result['found'] = len(x_face_locations)
+        data['found'] = len(x_face_locations)
 
         if len(x_face_locations) <= 0:
-            result['success'] = False
-            result['message'] = 'There is no face to process'
-            return json.dumps(result)
+            data['success'] = False
+            data['message'] = 'There is no face to process'
+            return data
 
         print("[MODULE::FACE_RECOGNITION::RESULT]=====================================================================================")
         print("Total faces found: {}".format(len(x_face_locations)))
@@ -189,7 +186,7 @@ class FaceRecognitionPROC(Processor):
                     # Find encodings for faces in the test iamge
 
                     date_start_encodings = get_date_now()
-                    faces_encodings = face_encodings(image_rgb, known_face_locations = x_face_locations)[i]
+                    faces_encodings = face_encodings(data['frame_rgb'], known_face_locations = x_face_locations)[i]
                     date_end_encodings = get_date_now()
 
                     process_ms_encodings += round((date_end_encodings - date_start_encodings).total_seconds() * 1000, 2)
@@ -207,6 +204,9 @@ class FaceRecognitionPROC(Processor):
 
                     process_ms_searches += round((date_end_search - date_start_search).total_seconds() * 1000, 2)
 
+                    # if searches query result != 0 ->
+                    total_success_count += 1
+
                     # TODO: searches 0. mı?
                     # FIXME: for 1 kez dönüyor tek face için
                     for search in searches:
@@ -217,40 +217,38 @@ class FaceRecognitionPROC(Processor):
                             name = 'unknown'
                             dist = 10.0
 
+                        result_face = {'result': name, 'confidence': dist}
+                        data['faces'].append(result_face)
+
                         if dist < top_dist:
                             top_dist = dist
                             top_name = name
                         if dist >= distance_threshold:
-                            result_face = {'result': name, 'confidence': dist}
-                            result['faces'].append(result_face)
-                            result['result'] = top_name
+                            data['result'] = top_name
 
-                result['process']['encodings'] = process_ms_encodings
-                result['process']['search'] = process_ms_searches
+                data['process']['encodings'] = process_ms_encodings
+                data['process']['search'] = process_ms_searches
 
-            rate = 100
+            if total_success_count != data['found']:
+                msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(data['found'], total_success_count)
+                data['message'] = msg
 
-            result['rate'] = rate
-            result['success'] = True
+            rate = data['found'] / total_success_count * 100
+
+            data['rate'] = rate
+            data['success'] = True
             self.process_successes += 1
         except pysolr.SolrError as e:
-            result['success'] = False
-            result['message'] = str(e)
+            data['success'] = False
+            data['message'] = str(e)
+            self.process_fails += 1
+        except:
+            data['success'] = False
+            data['message'] = ('Type: {}, Message: TRY-EXCEPT', sys.exc_info()[0])
             self.process_fails += 1
 
         self.total_processed += 1
 
-        date_end = get_date_now()
-
-        ms_diff = (date_end - date_start).total_seconds() * 1000
-
-        self.response_times.append(ms_diff)
-
-        result['process']['end'] = get_date_str(date_end)
-        result['process']['total'] = round(ms_diff, 2)
-
-        print("===========================================================================================")
-
         self.is_busy = False
 
-        return json.dumps(result)
+        return data

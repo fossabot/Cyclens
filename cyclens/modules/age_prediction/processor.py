@@ -43,63 +43,64 @@ class AgePredictionPROC(Processor):
 
         total_success_count = 0
 
-        try:
-            face_imgs = np.empty((data['found'], self.MD.face_size, self.MD.face_size, 3))
+        if data['found'] > 0:
 
-            for i, face in enumerate(data['frame_faces']):
+            try:
+                face_imgs = np.empty((data['found'], self.MD.face_size, self.MD.face_size, 3))
 
-                face_img, cropped = crop_face(data['frame_rgb'], face, margin = 40, size = self.MD.face_size)
+                for i, face in enumerate(data['frame_faces']):
 
-                # null check ve image.shape checks
-                (x, y, w, h) = cropped
+                    face_img, cropped = crop_face(data['frame_rgb'], face, margin = 40, size = self.MD.face_size)
 
-                result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'confidence': 0, 'result': 'null', 'success': False}
-                data['faces'].append(result_face)
+                    # null check ve image.shape checks
+                    (x, y, w, h) = cropped
 
-                # print(type(face_img)) # numpy.ndarray
-                # print(type(cropped)) # tuple
+                    result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'confidence': 0, 'result': 'null', 'success': False}
+                    data['faces'].append(result_face)
 
-                face_imgs[i, :, :, :] = face_img
+                    # print(type(face_img)) # numpy.ndarray
+                    # print(type(cropped)) # tuple
 
-            if len(face_imgs) > 0:
+                    face_imgs[i, :, :, :] = face_img
 
-                predict = self.MD.CASC_AGE.predict(face_imgs)
+                if len(face_imgs) > 0:
 
-                if predict is not None:
+                    predict = self.MD.CASC_AGE.predict(face_imgs)
 
-                    predicted_genders = predict[0]
-                    ages = np.arange(0, 101).reshape(101, 1)
-                    predicted_ages = predict[1].dot(ages).flatten()
-                    predicted_confidences = predict[1]
+                    if predict is not None:
 
-                    for i, face in enumerate(data['faces']):
-                        total_success_count += 1
+                        predicted_genders = predict[0]
+                        ages = np.arange(0, 101).reshape(101, 1)
+                        predicted_ages = predict[1].dot(ages).flatten()
+                        predicted_confidences = predict[1]
 
-                        confidence = np.max(predicted_confidences[i])
-                        age = int(predicted_ages[i])
+                        for i, face in enumerate(data['faces']):
+                            total_success_count += 1
 
-                        #gender = "F" if predicted_genders[i][0] > 0.5 else "M"
+                            confidence = np.max(predicted_confidences[i])
+                            age = int(predicted_ages[i])
 
-                        data['faces'][i]['confidence'] = round(float(confidence), 2)
-                        data['faces'][i]['result'] = age
-                        data['faces'][i]['success'] = True
+                            #gender = "F" if predicted_genders[i][0] > 0.5 else "M"
 
-            if total_success_count != data['found']:
-                msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(data['found'], total_success_count)
-                data['message'] = msg
+                            data['faces'][i]['confidence'] = round(float(confidence), 2)
+                            data['faces'][i]['result'] = age
+                            data['faces'][i]['success'] = True
 
-            rate = data['found'] / total_success_count * 100
+                if total_success_count != data['found']:
+                    msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(data['found'], total_success_count)
+                    data['message'] = msg
 
-            data['rate'] = rate
-            data['success'] = True
-            self.process_successes += 1
+                rate = data['found'] / total_success_count * 100
 
-        except:
-            data['success'] = False
-            data['message'] = ('Type: {}, Message: {}', sys.exc_info()[0], e)
-            self.process_fails += 1
+                data['rate'] = rate
+                data['success'] = True
+                self.process_successes += 1
+            except:
+                data['success'] = False
+                data['message'] = ('Type: {}, Message: TRY-EXCEPT', sys.exc_info()[0])
+                self.process_fails += 1
 
-        self.total_processed += 1
+            self.total_processed += 1
 
         self.is_busy = False
 

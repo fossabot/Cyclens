@@ -186,14 +186,7 @@ class FaceRecognitionMD(Module):
 
     def do_process(self, data):
         super(FaceRecognitionMD, self).do_process(data)
-        print("[MODULE::FACE_RECOGNITION::DO_PROCESS]:")
-
-        print("[MODULE::FACE_RECOGNITION::PIPELINE]: Sending to PROCESS Pipe")
-        print("[MODULE::FACE_RECOGNITION::PROCESS]: [START]")
-        data = self.processor.process(data)
-        print("[MODULE::FACE_RECOGNITION::PROCESS]: [END] - Result: {}".format(data))
-
-        return data
+        return self.processor.process(data)
 
     # Gelen Face'leri Crop yap, işlemden geçir ve klasöre ekle
     def do_face_add(self, data, id):

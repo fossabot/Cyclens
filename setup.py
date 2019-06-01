@@ -62,9 +62,9 @@ setup(
     maintainer_email= __maintainermail__,
     description     = __description__,
     long_description= __descriptionfull__,
-    packages        = find_packages(exclude=('tests', 'docs')),
+    packages        = find_packages(exclude=('test', 'docs')),
     zip_safe        = False,
-    test_suite      = 'tests',
+    test_suite      = 'test',
     classifiers     = [
         'License :: Unlicensed',
         'Development Status :: 0 - Development/Init',

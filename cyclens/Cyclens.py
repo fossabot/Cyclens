@@ -84,10 +84,14 @@ class Cyclens(object):
         _ready = threading.Event()
 
         self.pre_processor = PreProcessor()
-        self.pre_processor.load()
+        pre_loaded = self.pre_processor.try_load()
+
+        if not pre_loaded:
+            print('\n> PreProcessor: Unable to load cascade classifier!')
+            exit(1)
 
         self.post_processor = PostProcessor()
-        self.post_processor.load()
+        self.post_processor.try_load()
 
         print('\n> Booting: Action Recognition')
         date_start = datetime.now()
@@ -192,7 +196,7 @@ class Cyclens(object):
 
             data = self.pre_processor.process(img)
 
-            if data['success'] is True:
+            if data['success'] is True and data['found'] > 0:
 
                 if ar is True:
                     data['module'] = 'action_recognition'
@@ -249,8 +253,6 @@ class Cyclens(object):
 
                     print('[MODULE::GENDER_PREDICTION::RESULT]: {}'.format(proc_data_gp))
 
-
-
             else:
                 result['success'] = data['success']
                 result['message'] = data['message']
@@ -266,7 +268,7 @@ class Cyclens(object):
         result['process']['end'] = get_date_str(date_end)
         result['process']['total'] = round(ms_diff, 2)
 
-        print('[Elapsed time: {}] ======================================================================================'.format(result['process']['total']))
+        print('[Elapsed time: {}] ============================================================================================================='.format(result['process']['total']))
 
         return result
 

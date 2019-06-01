@@ -179,7 +179,7 @@ class ApiServer(threading.Thread):
 
             result = {'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'round': 0, 'modules': []}
 
-            imgs = [load_image_file('../tests/images/benchmark/bruteforce_0.jpg'), load_image_file('../tests/images/benchmark/bruteforce_1.jpeg'), load_image_file('../tests/images/benchmark/bruteforce_2.jpeg')]
+            imgs = [load_image_file('../test/images/benchmark/bruteforce_0.jpg'), load_image_file('../test/images/benchmark/bruteforce_1.jpeg'), load_image_file('../test/images/benchmark/bruteforce_2.jpeg')]
 
             TOTAL = 10
 

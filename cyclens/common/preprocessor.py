@@ -15,20 +15,25 @@ from os.path import isfile
 from multiprocessing import Process, Queue
 import threading
 
+from pathlib import Path
+
+base_path = Path(__file__).parent.parent
+
 
 class PreProcessor:
 
     def __init__(self):
-        self.detection_model_path = '../data/models/detection/haarcascade_frontalface_default.xml'
+        self.detection_model_path = str((base_path / "../data/models/detection/haarcascade_frontalface_default.xml").resolve())
         self.CASC_FACE = None
 
-    def load(self):
+    def try_load(self):
         if isfile(self.detection_model_path):
-            self.CASC_FACE = cv2.CascadeClassifier(self.detection_model_path)
-            print("---> Face detection data set Loaded!!!")
-        else:
-            print("---> Couldn't find cascade model")
-            exit(1)
+            try:
+                self.CASC_FACE = cv2.CascadeClassifier(self.detection_model_path)
+                return True
+            except:
+                return False
+        return False
 
     def process(self, data):
         result = {'success': True, 'module': '', 'message': 'null', 'process': {'start': 0, 'end': 0, 'total': 0}, 'found': 0, 'rate': 0, 'faces': [], 'frame_faces': None, 'frame_gray': None, 'frame_rgb': None}
@@ -42,6 +47,13 @@ class PreProcessor:
 
         frame = cv2.resize(data, (0, 0), fx = 0.25, fy = 0.25)
 
+        h, w = frame.shape[:2]
+
+        if h <= 0 or w <= 0:
+            result['success'] = False
+            result['message'] = 'There is no frame to process'
+            return result
+
         image_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
@@ -53,7 +65,7 @@ class PreProcessor:
         result['found'] = len(result['frame_faces'])
 
         if len(result['frame_faces']) <= 0:
-            result['success'] = False
+            result['success'] = True
             result['message'] = 'There is no face to process'
             return result
 

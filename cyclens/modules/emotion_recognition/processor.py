@@ -41,59 +41,60 @@ class EmotionRecognitionPROC(Processor):
 
         total_success_count = 0
 
-        try:
+        if data['found'] > 0:
 
-            for i, face in enumerate(data['frame_faces']):
+            try:
 
-                x, y, w, h = set_offsets(face, (20, 40))
+                for i, face in enumerate(data['frame_faces']):
 
-                result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'confidence': 0, 'result': 'null', 'success': False}
+                    x, y, w, h = set_offsets(face, (20, 40))
 
-                face_gray = data['frame_gray'][w:h, x:y]
+                    result_face = {'id': i, 'x': int(x), 'y': int(y), 'width': int(w), 'height': int(h), 'confidence': 0, 'result': 'null', 'success': False}
 
-                try:
-                    face_gray = cv2.resize(face_gray, self.MD.emotion_target_size)
-                    #cv2.imshow("a", face_gray)
-                    #cv2.waitKey(1000)
-                    #cv2.destroyAllWindows()
-                except:
-                    continue
+                    face_gray = data['frame_gray'][w:h, x:y]
 
-                face_gray = div_255(face_gray, True)
+                    try:
+                        face_gray = cv2.resize(face_gray, self.MD.emotion_target_size)
+                        #cv2.imshow("a", face_gray)
+                        #cv2.waitKey(1000)
+                        #cv2.destroyAllWindows()
+                    except:
+                        continue
 
-                face_gray = np.expand_dims(face_gray, 0)
-                face_gray = np.expand_dims(face_gray, -1)
+                    face_gray = div_255(face_gray, True)
 
-                predict = self.MD.CASC_EMOTION.predict(face_gray)
+                    face_gray = np.expand_dims(face_gray, 0)
+                    face_gray = np.expand_dims(face_gray, -1)
 
-                if predict is not None:
-                    total_success_count += 1
-                    confidence = np.max(predict)
-                    arg = np.argmax(predict)
-                    text = self.MD.EMOTIONS[arg]
+                    predict = self.MD.CASC_EMOTION.predict(face_gray)
 
-                    result_face['confidence'] = round(float(confidence), 2)
-                    result_face['result'] = text
-                    result_face['success'] = True
+                    if predict is not None:
+                        total_success_count += 1
+                        confidence = np.max(predict)
+                        arg = np.argmax(predict)
+                        text = self.MD.EMOTIONS[arg]
 
-                data['faces'].append(result_face)
+                        result_face['confidence'] = round(float(confidence), 2)
+                        result_face['result'] = text
+                        result_face['success'] = True
 
-            if total_success_count != data['found']:
-                msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(data['found'], total_success_count)
-                data['message'] = msg
+                    data['faces'].append(result_face)
 
-            rate = data['found'] / total_success_count * 100
+                if total_success_count != data['found']:
+                    msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(data['found'], total_success_count)
+                    data['message'] = msg
 
-            data['rate'] = rate
-            data['success'] = True
-            self.process_successes += 1
+                rate = data['found'] / total_success_count * 100
 
-        except:
-            data['success'] = False
-            data['message'] = ('Type: {}, Message: {}', sys.exc_info()[0], e)
-            self.process_fails += 1
+                data['rate'] = rate
+                data['success'] = True
+                self.process_successes += 1
+            except:
+                data['success'] = False
+                data['message'] = ('Type: {}, Message: TRY-EXCEPT', sys.exc_info()[0])
+                self.process_fails += 1
 
-        self.total_processed += 1
+            self.total_processed += 1
 
         self.is_busy = False
 

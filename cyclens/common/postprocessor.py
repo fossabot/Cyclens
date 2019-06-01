@@ -7,21 +7,24 @@ from __future__ import unicode_literals
 from datetime import datetime
 import json
 
+
 class PostProcessor:
 
     def __init__(self):
         pass
 
-    def load(self):
-        pass
+    def try_load(self):
+        return True
 
     def process(self, module, data):
+
+        if data is None:
+            result = {'success': False, 'message': 'There is no data for post-processor'}
+            return json.dumps(result)
 
         date_end = datetime.now()
 
         ms_diff = (date_end - data['process']['start']).total_seconds() * 1000
-
-        module.processor.response_times.append(ms_diff)
 
         data['process']['start'] = get_date_str(data['process']['start'])
         data['process']['end'] = get_date_str(date_end)
@@ -30,6 +33,14 @@ class PostProcessor:
         del data['frame_faces']
         del data['frame_gray']
         del data['frame_rgb']
+
+        if module is None:
+            data['success'] = False
+            data['message'] = 'There is no data for post-processor'
+            return json.dumps(data)
+
+        if module is not None and module is not 'test':
+            module.processor.response_times.append(ms_diff)
 
         return json.dumps(data)
 

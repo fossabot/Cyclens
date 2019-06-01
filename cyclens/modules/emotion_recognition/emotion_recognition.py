@@ -3,14 +3,14 @@
 from __future__ import unicode_literals
 
 from ...common.module import Module
-
-import threading
+from ...common.paths import PATH_MODEL_EMOTION
 
 from .processor import EmotionRecognitionPROC
 
-import cv2
 from keras.models import load_model
 from os.path import isfile
+
+import threading
 
 
 class EmotionRecognitionMD(Module):
@@ -27,23 +27,12 @@ class EmotionRecognitionMD(Module):
         self.processor = EmotionRecognitionPROC(self, _ready)
         _ready.wait()
 
-        self.CASC_FACE = None
         self.CASC_EMOTION = None
 
-        self.EMOTIONS = {0: 'angry', 1: 'disgust', 2: 'fear', 3: 'happy', 4: 'sad', 5: 'surprise', 6: 'neutral'}
+        self.EMOTIONS = {0: 'ANGRY', 1: 'DISGUST', 2: 'FEAR', 3: 'HAPPY', 4: 'SAD', 5: 'SURPRISE', 6: 'NEUTRAL'}
 
-        detection_model_path = '../data/models/detection/haarcascade_frontalface_default.xml'
-        emotion_model_path = '../data/models/emotion/fer2013_mini_XCEPTION.102-0.66.hdf5'
-
-        if isfile(detection_model_path):
-            self.CASC_FACE = cv2.CascadeClassifier(detection_model_path)
-            print("---> Face detection data set Loaded!!!")
-        else:
-            print("---> Couldn't find cascade model")
-            exit(1)
-
-        if isfile(emotion_model_path):
-            self.CASC_EMOTION = load_model(emotion_model_path, compile=False)
+        if isfile(PATH_MODEL_EMOTION):
+            self.CASC_EMOTION = load_model(PATH_MODEL_EMOTION, compile=False)
             self.CASC_EMOTION._make_predict_function()
             self.emotion_target_size = self.CASC_EMOTION.input_shape[1:3]
             print("---> Emotion data set Loaded!!!")
