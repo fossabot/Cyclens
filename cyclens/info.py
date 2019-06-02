@@ -1,12 +1,18 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-""" [info.py module that holds package information]
+"""
+cyclens
+~~~~~~~
 
-Note:
-    All those info could be stored in the __init__ file
-    but we keep them here to keep the code clean.
+Implements info.py that holds package information
 
+This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+and you are welcome to redistribute it under certain conditions; See
+file LICENSE, which is part of this source code package, for details.
+
+:copyright: Copyright © 2019, The Cyclens Project
+:license: MIT, see LICENSE for more details.
 """
 
 from __future__ import unicode_literals

@@ -1,6 +1,19 @@
 # -*- coding: utf-8 -*-
 
-# https://github.com/ageitgey/face_recognition
+"""
+cyclens.modules.common
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Implements API functions for 'dlib' library.
+Ref: https://github.com/ageitgey/face_recognition
+
+This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+and you are welcome to redistribute it under certain conditions; See
+file LICENSE, which is part of this source code package, for details.
+
+:copyright: Copyright © 2019, The Cyclens Project
+:license: MIT, see LICENSE for more details.
+"""
 
 import PIL.Image
 import dlib

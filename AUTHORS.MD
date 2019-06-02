@@ -1,2 +1,0 @@
-Furkan Türkal
-Metin Ur

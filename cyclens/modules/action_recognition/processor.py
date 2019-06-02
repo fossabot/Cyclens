@@ -1,6 +1,19 @@
 # coding: utf-8
 
-"""Processor functions for Action Recognation"""
+"""
+cyclens.modules.action_recognition
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Implements processor engine for 'ACTION RECOGNITION' module
+
+This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+and you are welcome to redistribute it under certain conditions; See
+file LICENSE, which is part of this source code package, for details.
+
+:copyright: Copyright © 2019, The Cyclens Project
+:license: MIT, see LICENSE for more details.
+"""
+
 
 from __future__ import unicode_literals
 
@@ -47,4 +60,4 @@ class ActionRecognitionPROC(Processor):
 
         self.is_busy = False
 
-        return json.dumps(result)
+        return self.MD.post_processor.process(self.MD, data)

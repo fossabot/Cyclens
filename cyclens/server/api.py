@@ -1,6 +1,20 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+"""
+cyclens.server.api
+~~~~~~~~~~~~~~~~~~
+
+Implements Flask API with Tornado HTTPServer, WSGIContainer and IOLoop support.
+
+This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+and you are welcome to redistribute it under certain conditions; See
+file LICENSE, which is part of this source code package, for details.
+
+:copyright: Copyright © 2019, The Cyclens Project
+:license: MIT, see LICENSE for more details.
+"""
+
 from flask import Flask, Response, render_template, jsonify, request
 
 from tornado.wsgi import WSGIContainer
@@ -192,6 +206,68 @@ class ApiServer(threading.Thread):
             result = self.do_benchmark('gender_prediction', imgs, result)
 
             date_end = get_date_now()
+            ms_diff = (date_end - date_start).total_seconds() * 1000
+
+            result['process']['end'] = get_date_str(date_end)
+            result['process']['total'] = round(ms_diff, 2)
+
+            res = json.dumps(result)
+
+            return self.get_res(res)
+
+        @self.api.route('/api/v1/demo/benchmark_single', methods = ['GET'])
+        def route_benchmark_single():
+            date_start = get_date_now()
+
+            result = {'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'round': 0, 'modules': []}
+
+            imgs = [load_image_file('../test/images/benchmark/bruteforce_0.jpg'), load_image_file('../test/images/benchmark/bruteforce_1.jpeg'), load_image_file('../test/images/benchmark/bruteforce_2.jpeg')]
+
+            TOTAL = 1
+
+            result['round'] = TOTAL
+
+            vals = {'success': True, 'face_processed': 0, 'ms_processed': 0}
+
+            modules = {'age_prediction': vals, 'emotion_recognition': vals, 'face_recognition': vals, 'gender_prediction': vals}
+
+            for i in range(TOTAL):
+
+                for j in range(0, len(imgs)):
+
+                    proc = self.cyclens.process(imgs[j], False, True, True, True, True)
+
+                    for res in proc['modules']:
+                        name = res['module']
+                        faces = len(res['faces'])
+                        ms = res['process']['total']
+                        success = res['success']
+
+                        modules[name]['face_processed'] += faces
+                        modules[name]['ms_processed'] += ms
+                        modules[name]['success'] = modules[name]['success'] and success
+
+            date_end = get_date_now()
+
+            for key, val in modules.items():
+                module = {'module': key, 'success': True, 'FACES': 0, 'FPS': 0, 'MS': 0, 'MS_EST': 0, 'MS_STD': 0, 'MS_RMS': 0}
+
+                face_processed = modules[key]['face_processed']
+                ms_processed = modules[key]['ms_processed']
+
+                if face_processed is not 0:
+                    module['FACES'] = face_processed
+                    module['FPS'] = round(1000 * face_processed / ms_processed, 2)
+                    module['MS'] = round((date_end - date_start).total_seconds() * 1000)
+                    # module['MS_EST'] = mod.processor.get_response_time_estimated()
+                    # module['MS_STD'] = mod.processor.get_response_time_std()
+                    # module['MS_RMS'] = mod.processor.get_response_time_rms()
+                else:
+                    module['success'] = False
+
+                result['modules'].append(module)
+                result['success'] = result['success'] and module['success']
+
             ms_diff = (date_end - date_start).total_seconds() * 1000
 
             result['process']['end'] = get_date_str(date_end)

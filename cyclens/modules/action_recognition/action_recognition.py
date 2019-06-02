@@ -1,5 +1,19 @@
 # coding: utf-8
 
+"""
+cyclens.modules.action_recognition
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Implements 'ACTION RECOGNITION' module
+
+This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+and you are welcome to redistribute it under certain conditions; See
+file LICENSE, which is part of this source code package, for details.
+
+:copyright: Copyright © 2019, The Cyclens Project
+:license: MIT, see LICENSE for more details.
+"""
+
 from __future__ import unicode_literals
 
 from ...common.module import Module
@@ -49,7 +63,7 @@ class ActionRecognitionMD(Module):
 
         self.processor.stop()
 
-    def do_process(self, data):
+    async def do_process(self, data):
         super(ActionRecognitionMD, self).do_process(data)
         self.processor.process(data)
 

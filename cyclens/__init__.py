@@ -1,6 +1,20 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+"""
+cyclens
+~~~~~~~
+
+Implements __init__.py used by Cyclens.
+
+This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+and you are welcome to redistribute it under certain conditions; See
+file LICENSE, which is part of this source code package, for details.
+
+:copyright: Copyright © 2019, The Cyclens Project
+:license: MIT, see LICENSE for more details.
+"""
+
 import codecs
 import io
 import os

@@ -1,6 +1,18 @@
 # coding: utf-8
 
-"""Common post-processor class for modules."""
+"""
+cyclens.modules.common
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Implements common post-processor class for modules.
+
+This program comes with ABSOLUTELY NO WARRANTY; This is free software,
+and you are welcome to redistribute it under certain conditions; See
+file LICENSE, which is part of this source code package, for details.
+
+:copyright: Copyright © 2019, The Cyclens Project
+:license: MIT, see LICENSE for more details.
+"""
 
 from __future__ import unicode_literals
 
