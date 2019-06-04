@@ -16,13 +16,11 @@ file LICENSE, which is part of this source code package, for details.
 
 from __future__ import unicode_literals
 
-from cyclens.common.preprocessor import PreProcessor
-
-from .common import *
-
-import os
 import sys
 import unittest
+
+from .common import *
+from cyclens.common.preprocessor import PreProcessor
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

@@ -17,16 +17,7 @@ file LICENSE, which is part of this source code package, for details.
 
 from __future__ import unicode_literals
 
-from ...common.module import Module
 from ...common.processor import Processor
-
-import cv2
-import numpy as np
-import json
-
-from ...utils import (
-    ProcessingError,
-)
 
 
 class ActionRecognitionPROC(Processor):

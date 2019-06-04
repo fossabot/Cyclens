@@ -16,9 +16,7 @@ file LICENSE, which is part of this source code package, for details.
 
 from __future__ import unicode_literals
 
-from multiprocessing import Process, Queue
 import threading
-
 import numpy as np
 
 

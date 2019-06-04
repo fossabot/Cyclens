@@ -16,15 +16,14 @@ file LICENSE, which is part of this source code package, for details.
 
 from __future__ import unicode_literals
 
-from ...common.module import Module
-from ...common.paths import PATH_MODEL_EMOTION
+import threading
+
+from os.path import isfile
+from keras.models import load_model
 
 from .processor import EmotionRecognitionPROC
-
-from keras.models import load_model
-from os.path import isfile
-
-import threading
+from ...common.module import Module
+from ...common.paths import PATH_MODEL_EMOTION
 
 
 class EmotionRecognitionMD(Module):

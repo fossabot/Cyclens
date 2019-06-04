@@ -16,14 +16,14 @@ file LICENSE, which is part of this source code package, for details.
 
 from __future__ import unicode_literals
 
-from ...common.module import Module
-
+import cv2
 import threading
 
-import cv2
 from os.path import isfile
 
 from .processor import ActionRecognitionPROC
+from ...common.module import Module
+
 
 class ActionRecognitionMD(Module):
 

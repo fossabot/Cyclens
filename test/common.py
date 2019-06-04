@@ -16,12 +16,13 @@ file LICENSE, which is part of this source code package, for details.
 
 from __future__ import unicode_literals
 
-from pathlib import Path
-from PIL import Image
-from datetime import datetime
-
 import cv2
 import os
+
+from pathlib import Path
+from datetime import datetime
+
+
 
 import numpy as np
 

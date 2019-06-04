@@ -17,7 +17,6 @@ file LICENSE, which is part of this source code package, for details.
 from __future__ import unicode_literals
 
 from datetime import datetime
-import json
 
 
 class PostProcessor:

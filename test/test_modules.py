@@ -16,23 +16,22 @@ file LICENSE, which is part of this source code package, for details.
 
 from __future__ import unicode_literals
 
-from cyclens.common.preprocessor import PreProcessor
-from cyclens.common.postprocessor import PostProcessor
-
-from cyclens.modules.age_prediction.age_prediction import AgePredictionMD
-from cyclens.modules.emotion_recognition.emotion_recognition import EmotionRecognitionMD
-from cyclens.modules.face_recognition.face_recognition import FaceRecognitionMD
-from cyclens.modules.gender_prediction.gender_prediction import GenderPredictionMD
-
-from .common import *
-
-import os
 import sys
 import logging
 import unittest
 import threading
 
 import tensorflow as tf
+
+from cyclens.common.preprocessor import PreProcessor
+from cyclens.common.postprocessor import PostProcessor
+
+from .common import *
+from cyclens.modules.age_prediction.age_prediction import AgePredictionMD
+from cyclens.modules.emotion_recognition.emotion_recognition import EmotionRecognitionMD
+from cyclens.modules.face_recognition.face_recognition import FaceRecognitionMD
+from cyclens.modules.gender_prediction.gender_prediction import GenderPredictionMD
+
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 

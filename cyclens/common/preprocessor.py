@@ -16,17 +16,11 @@ file LICENSE, which is part of this source code package, for details.
 
 from __future__ import unicode_literals
 
-from datetime import datetime
-
 import cv2
 import numpy as np
-import json
 
 from os.path import isfile
-
-from multiprocessing import Process, Queue
-import threading
-
+from datetime import datetime
 from pathlib import Path
 
 base_path = Path(__file__).parent.parent
@@ -77,7 +71,7 @@ class PreProcessor:
         result['found'] = len(result['frame_faces'])
 
         if len(result['frame_faces']) <= 0:
-            result['success'] = True
+            result['success'] = False
             result['message'] = 'There is no face to process'
             return result
 

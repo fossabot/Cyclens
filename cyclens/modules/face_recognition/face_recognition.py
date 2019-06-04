@@ -17,10 +17,7 @@ file LICENSE, which is part of this source code package, for details.
 
 from __future__ import unicode_literals
 
-from ...common.module import Module
-from ...common.path_system import create_folder_root, create_folder_id, check_folder_root, get_latest_folder_id, get_latest_face_id_from_folder_id, get_folder_count
-from ...common.api import load_image_file, face_locations, face_encodings
-from ...constants import SOLR_URL
+
 
 import threading
 
@@ -40,6 +37,11 @@ from os.path import isfile
 from sklearn import neighbors
 
 from .processor import FaceRecognitionPROC
+
+from ...common.module import Module
+from ...common.path_system import create_folder_root, create_folder_id, check_folder_root, get_latest_folder_id, get_latest_face_id_from_folder_id, get_folder_count
+from ...common.api import load_image_file, face_locations, face_encodings
+from ...constants import SOLR_URL
 
 
 class FaceRecognitionMD(Module):

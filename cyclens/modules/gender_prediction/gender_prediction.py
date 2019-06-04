@@ -16,19 +16,14 @@ file LICENSE, which is part of this source code package, for details.
 
 from __future__ import unicode_literals
 
-from ...common.module import Module
-
-from ...common.paths import PATH_MODEL_GENDER
-
 import threading
-import time
 
-from .processor import GenderPredictionPROC
-
-import cv2
-import keras
 from keras.models import load_model
 from os.path import isfile
+
+from .processor import GenderPredictionPROC
+from ...common.paths import PATH_MODEL_GENDER
+from ...common.module import Module
 
 
 class GenderPredictionMD(Module):

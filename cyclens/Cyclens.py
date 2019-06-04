@@ -17,34 +17,26 @@ file LICENSE, which is part of this source code package, for details.
 
 import threading
 import logging
-import time
 import keras
-import sys
 import os
 import signal
 
 from datetime import datetime
 
-import tensorflow as tf
-import json
 import copy
 import asyncio
 import nest_asyncio
+import tensorflow as tf
 
-from .common.preprocessor import PreProcessor, get_date_now, get_date_str
 from .server import ApiServer
-
+from .common.preprocessor import PreProcessor, get_date_now, get_date_str
+from .common.postprocessor import PostProcessor
 from .modules.action_recognition.action_recognition import ActionRecognitionMD
 from .modules.age_prediction.age_prediction import AgePredictionMD
 from .modules.emotion_recognition.emotion_recognition import EmotionRecognitionMD
 from .modules.face_recognition.face_recognition import FaceRecognitionMD
 from .modules.gender_prediction.gender_prediction import GenderPredictionMD
 
-from .utils import (
-    PreProcessingError,
-    ProcessingError,
-    PostProcessingError,
-)
 
 class Cyclens(object):
     """Cyclens class.
@@ -198,7 +190,7 @@ class Cyclens(object):
 
             data = self.pre_processor.process(img)
 
-            if data['success'] is True and data['found'] > 0:
+            if data['success'] and data['found'] > 0:
 
                 loop = asyncio.get_event_loop()
 

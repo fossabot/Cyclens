@@ -16,17 +16,14 @@ file LICENSE, which is part of this source code package, for details.
 
 from __future__ import unicode_literals
 
-from ...common.module import Module
-from ...common.wide_resnet import WideResNet
-
-from ...common.paths import PATH_MODEL_AGE
-
 import threading
 
-import cv2
 from os.path import isfile
 
 from .processor import AgePredictionPROC
+from ...common.module import Module
+from ...common.paths import PATH_MODEL_AGE
+from ...common.wide_resnet import WideResNet
 
 
 class AgePredictionMD(Module):

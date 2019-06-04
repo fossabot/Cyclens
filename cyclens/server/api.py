@@ -15,27 +15,23 @@ file LICENSE, which is part of this source code package, for details.
 :license: MIT, see LICENSE for more details.
 """
 
-from flask import Flask, Response, render_template, jsonify, request
+from flask import Flask, Response, request
 
+import cv2
+import json
+import asyncio
+import threading
+import numpy as np
+
+from datetime import datetime
+from matplotlib import pyplot as plt
 from tornado.wsgi import WSGIContainer
 from tornado.httpserver import HTTPServer
 from tornado.ioloop import IOLoop
 
-import asyncio
 
 from ..common.preprocessor import get_date_now, get_date_str
 from ..common.api import load_image_file
-
-from datetime import datetime
-
-import json
-import numpy as np
-import cv2
-from matplotlib import pyplot as plt
-
-import threading
-from multiprocessing import Process, Queue
-
 
 headerJSON = {'Content-Type': 'application/json'}
 headerJPEG = {'Content-Type': 'image/jpeg'}

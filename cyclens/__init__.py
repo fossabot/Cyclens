@@ -15,11 +15,6 @@ file LICENSE, which is part of this source code package, for details.
 :license: MIT, see LICENSE for more details.
 """
 
-import codecs
-import io
-import os
-import random
-import sys
 
 from .info import (
     __appname__,

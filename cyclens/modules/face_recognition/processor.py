@@ -16,20 +16,14 @@ file LICENSE, which is part of this source code package, for details.
 
 from __future__ import unicode_literals
 
-from ...common.preprocessor import div_255, get_date_now, get_date_str, crop_face
-from ...common.processor import Processor
-from ...common.api import load_image_file, face_locations, face_encodings, face_distance
-
-import time
 import json
 import pysolr
 import cv2
 import sys
 
-
-from ...utils import (
-    ProcessingError,
-)
+from ...common.preprocessor import get_date_now, get_date_str
+from ...common.processor import Processor
+from ...common.api import face_locations, face_encodings
 
 
 class FaceRecognitionPROC(Processor):
