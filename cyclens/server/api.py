@@ -283,6 +283,11 @@ class ApiServer(threading.Thread):
 
             img = self.get_img(request)
 
+            if img is None:
+                result = {'success': False, 'message': 'There is no image to process'}
+                res = json.dumps(result)
+                return self.get_res(res), 400
+
             result = self.cyclens.process(img, ar, ap, er, fr, gp)
 
             res = json.dumps(result)
