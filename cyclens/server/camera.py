@@ -24,7 +24,8 @@ out = cv2.VideoWriter(FILE_OUTPUT, fourcc, 20.0, (int(width), int(height)))
 kernel = np.ones((7, 7), np.uint8)
 
 
-while(cap.isOpened()):
+while cap.isOpened():
+
     ret, frame = cap.read()
 
     if ret == True:
