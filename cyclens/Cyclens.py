@@ -245,6 +245,19 @@ class Cyclens(object):
         return result
 
     @classmethod
+    def get_module_by_name(self, name):
+        if name == "action_recognition":
+            return self.module_ar
+        elif name == "age_prediction":
+            return  self.module_ap
+        elif name == "emotion_recognition":
+            return self.module_er
+        elif name == "face_recognition":
+            return self.module_fr
+        elif name == "gender_prediction":
+            return self.module_gp
+
+    @classmethod
     def stop(self):
         self.api.stop()
 

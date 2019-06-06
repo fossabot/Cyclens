@@ -215,17 +215,19 @@ class ApiServer(threading.Thread):
         def route_benchmark_single():
             date_start = get_date_now()
 
-            result = {'success': False, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'round': 0, 'modules': []}
+            result = {'success': True, 'message': 'null', 'process': {'start': get_date_str(date_start), 'end': 0, 'total': 0}, 'round': 0, 'modules': []}
 
             imgs = [load_image_file('../test/images/benchmark/bruteforce_0.jpg'), load_image_file('../test/images/benchmark/bruteforce_1.jpeg'), load_image_file('../test/images/benchmark/bruteforce_2.jpeg')]
 
-            TOTAL = 1
+            TOTAL = 10
 
             result['round'] = TOTAL
 
             vals = {'success': True, 'face_processed': 0, 'ms_processed': 0}
 
             modules = {'age_prediction': vals, 'emotion_recognition': vals, 'face_recognition': vals, 'gender_prediction': vals}
+
+            procs = {}
 
             for i in range(TOTAL):
 
@@ -235,6 +237,8 @@ class ApiServer(threading.Thread):
 
                     for res in proc['modules']:
                         name = res['module']
+                        procs[name] = res['module']
+
                         faces = len(res['faces'])
                         ms = res['process']['total']
                         success = res['success']
@@ -255,11 +259,15 @@ class ApiServer(threading.Thread):
                     module['FACES'] = face_processed
                     module['FPS'] = round(1000 * face_processed / ms_processed, 2)
                     module['MS'] = round((date_end - date_start).total_seconds() * 1000)
-                    # module['MS_EST'] = mod.processor.get_response_time_estimated()
-                    # module['MS_STD'] = mod.processor.get_response_time_std()
-                    # module['MS_RMS'] = mod.processor.get_response_time_rms()
+
+                    mod = self.cyclens.get_module_by_name(procs[key])
+
+                    module['MS_EST'] = mod.processor.get_response_time_estimated()
+                    module['MS_STD'] = mod.processor.get_response_time_std()
+                    module['MS_RMS'] = mod.processor.get_response_time_rms()
                 else:
                     module['success'] = False
+                    module['message'] = 'No faces to process'
 
                 result['modules'].append(module)
                 result['success'] = result['success'] and module['success']
@@ -271,7 +279,7 @@ class ApiServer(threading.Thread):
 
             res = json.dumps(result)
 
-            return self.get_res(res)
+            return self.get_res(res), 200
 
         @self.api.route('/api/v1/demo/single', methods = ['POST'])
         def route_single():

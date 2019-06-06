@@ -62,7 +62,6 @@ setup(
     maintainer_email= __maintainermail__,
     description     = __description__,
     long_description= __descriptionfull__,
-    packages        = find_packages(exclude=('test', 'docs')),
     zip_safe        = False,
     test_suite      = 'test',
     classifiers     = [
@@ -81,5 +80,4 @@ setup(
         'Topic :: Computer Vision :: Open CV',
         'Topic :: Software Development :: Final Project',
     ],
-    **params
 )
