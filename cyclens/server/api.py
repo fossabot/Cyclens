@@ -292,6 +292,7 @@ class ApiServer(threading.Thread):
             img = self.get_img(request)
 
             if img is None:
+                print(img)
                 result = {'success': False, 'message': 'There is no image to process'}
                 res = json.dumps(result)
                 return self.get_res(res), 400
@@ -455,7 +456,12 @@ class ApiServer(threading.Thread):
 
     def get_img(self, request):
         data = request.files['file'].read()
+
         npimg = np.frombuffer(data, np.uint8)
+
+        if len(npimg) <= 0:
+            return None
+
         img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
 
         return img

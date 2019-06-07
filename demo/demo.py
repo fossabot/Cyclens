@@ -74,7 +74,6 @@ while cap.isOpened():
 
         cv2.putText(frame, ('FPS: %.2f' % fps), (0, 20), font, 0.5, (200, 255, 155))
 
-
         faces = faceCascade.detectMultiScale(
             frame,
             scaleFactor = 1.1,
@@ -106,7 +105,6 @@ while cap.isOpened():
                     pass
 
             cv2.putText(frame, z, (x, y + 20), font, 0.5, (200, 255, 155))
-
 
     cv2.imshow('DEMO', frame)
 

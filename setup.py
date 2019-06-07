@@ -20,7 +20,7 @@ import sys
 from cyclens import constants
 
 try:
-    from setuptools import setup, Command
+    from setuptools import setup, find_packages, Command
     setuptools_available = True
 except ImportError:
     from distutils.core import setup, Command
@@ -41,15 +41,10 @@ from .cyclens import (
     __licensefull__,
 )
 
-# ===============
-# Functions
-# ===============
+with open("README.md", "r") as readme_file:
+    readme = readme_file.read()
 
-# Codes...
-
-# ===============
-# Setup Info
-# ===============
+requirements = ["numpy>=1.16.2"]
 
 setup(
     version         = __version__,
@@ -60,8 +55,10 @@ setup(
     author_email    = __authormail__,
     maintainer      = __maintainer__,
     maintainer_email= __maintainermail__,
-    description     = __description__,
-    long_description= __descriptionfull__,
+    long_description= readme,
+    long_description_content_type = "text/markdown",
+    packages        = find_packages(),
+    install_requires= requirements,
     zip_safe        = False,
     test_suite      = 'test',
     classifiers     = [
