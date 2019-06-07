@@ -62,9 +62,6 @@ class EmotionRecognitionPROC(Processor):
 
                 try:
                     face_gray = cv2.resize(face_gray, self.MD.emotion_target_size)
-                    #cv2.imshow("a", face_gray)
-                    #cv2.waitKey(1000)
-                    #cv2.destroyAllWindows()
                 except:
                     continue
 

@@ -65,9 +65,6 @@ class FaceRecognitionPROC(Processor):
                 process_ms_encodings = 0
                 process_ms_searches = 0
 
-                top_name = ''
-                top_dist = 1.0
-
                 for i in range(len(x_face_locations)):
 
                     # Find encodings for faces in the test iamge
@@ -91,33 +88,36 @@ class FaceRecognitionPROC(Processor):
 
                     process_ms_searches += round((date_end_search - date_start_search).total_seconds() * 1000, 2)
 
-                    # if searches query result != 0 ->
+                    # TODO: if searches query result != 0 ->
                     total_success_count += 1
 
-                    # TODO: searches 0. mı?
-                    # FIXME: for 1 kez dönüyor tek face için
+                    top_name = ''
+                    top_dist = 0.0
+
                     for search in searches:
                         try:
                             name = search['name']
                             dist = round(1.0 - search[query], 2)
                         except KeyError as e:
                             name = 'unknown'
-                            dist = 10.0
+                            dist = 100.0
 
-                        result_face = {'result': name, 'confidence': dist}
-                        data['faces'].append(result_face)
-
-                        if dist < top_dist:
+                        if dist > top_dist:
                             top_dist = dist
                             top_name = name
-                        if dist >= distance_threshold:
-                            data['result'] = top_name
+
+                    if top_dist >= distance_threshold:
+                        result_face = {'result': top_name, 'confidence': top_dist}
+                    else:
+                        result_face = {'result': 'unknown', 'confidence': -1.0}
+
+                    data['faces'].append(result_face)
 
                 data['process']['encodings'] = process_ms_encodings
                 data['process']['search'] = process_ms_searches
 
-            if total_success_count != data['found']:
-                msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(data['found'], total_success_count)
+            if total_success_count != len(x_face_locations):
+                msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(len(x_face_locations), total_success_count)
                 data['message'] = msg
 
             if total_success_count > 0:

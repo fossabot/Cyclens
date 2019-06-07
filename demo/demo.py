@@ -92,17 +92,18 @@ while cap.isOpened():
             for m in res['modules']:
                 n = m['module']
 
-                try:
-                    if n == 'age_prediction':
-                        z += str(m['faces'][0]['result']) + ', '
-                    elif n == 'emotion_recognition':
-                        z += str(m['faces'][0]['result']) + ', '
-                    elif n == 'face_recognition':
-                        z += str(m['faces'][0]['result']) + ', '
-                    elif n == 'gender_prediction':
-                        z += str(m['faces'][0]['result']) + ', '
-                except:
-                    pass
+                top_conf = 0.0
+                top_result = ''
+
+                for n in range(len(m['faces'])):
+                    conf = m['faces'][n]['confidence']
+                    result = m['faces'][n]['result']
+
+                    if conf > top_conf:
+                        top_conf = conf
+                        top_result = result
+
+                z += str(top_result) + ', '
 
             cv2.putText(frame, z, (x, y + 20), font, 0.5, (200, 255, 155))
 
