@@ -23,6 +23,8 @@ from os.path import isfile
 from datetime import datetime
 from pathlib import Path
 
+from .api import face_locations, face_encodings
+
 base_path = Path(__file__).parent.parent
 
 
@@ -66,13 +68,22 @@ class PreProcessor:
         result['frame_gray'] = image_gray
         result['frame_rgb'] = image_rgb
 
+        date_start_locations = datetime.now()
+
+        # TODO: configs den seç: opencv mi dlib mi, hog mu cnn mi
+
         result['frame_faces'] = self.CASC_FACE.detectMultiScale(image_gray, scaleFactor = 1.3, minNeighbors = 5)
+        # result['frame_faces'] = face_locations(image_gray, model="hog")
+
+        date_end_locations = datetime.now()
+
+        result['process']['locations'] = round((date_end_locations - date_start_locations).total_seconds() * 1000, 2)
 
         result['found'] = len(result['frame_faces'])
 
         if len(result['frame_faces']) <= 0:
             result['success'] = False
-            result['message'] = 'There is no face to process'
+            result['message'] = 'There are no faces to process'
             return result
 
         return result

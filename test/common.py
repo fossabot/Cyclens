@@ -22,10 +22,6 @@ import os
 from pathlib import Path
 from datetime import datetime
 
-
-
-import numpy as np
-
 IMG_EXTS = [".jpg", ".jpeg", ".png", ".gif"]
 
 PATH_BASE = Path(__file__).parent

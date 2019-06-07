@@ -51,8 +51,9 @@ class EmotionRecognitionPROC(Processor):
         if data['found'] > 0:
 
             #try:
-
             for i, face in enumerate(data['frame_faces']):
+
+                # face = data['frame_gray'][top:bottom, left:right]
 
                 x, y, w, h = set_offsets(face, (20, 40))
 

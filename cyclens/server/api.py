@@ -252,8 +252,14 @@ class ApiServer(threading.Thread):
             for key, val in modules.items():
                 module = {'module': key, 'success': True, 'FACES': 0, 'FPS': 0, 'MS': 0, 'MS_EST': 0, 'MS_STD': 0, 'MS_RMS': 0}
 
+                success = modules[key]['success']
+
                 face_processed = modules[key]['face_processed']
                 ms_processed = modules[key]['ms_processed']
+
+                if not success:
+                    module['message'] = modules[key]['message']
+                    continue
 
                 if face_processed is not 0:
                     module['FACES'] = face_processed

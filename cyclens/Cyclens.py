@@ -234,6 +234,7 @@ class Cyclens(object):
 
         result['process']['end'] = get_date_str(date_end)
         result['process']['total'] = round(ms_diff, 2)
+        result['process']['locations'] = data['process']['locations']
 
         print(result)
 

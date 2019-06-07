@@ -41,6 +41,8 @@ class PostProcessor:
         data['process']['end'] = get_date_str(date_end)
         data['process']['total'] = round(ms_diff, 2)
 
+        del data['process']['locations']
+
         del data['frame_faces']
         del data['frame_gray']
         del data['frame_rgb']

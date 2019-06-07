@@ -53,71 +53,64 @@ class FaceRecognitionPROC(Processor):
 
         if data['found'] > 0:
 
-            date_start_locations = get_date_now()
-            x_face_locations = face_locations(data['frame_rgb'])
-            date_end_locations = get_date_now()
-
-            data['process']['locations'] = round((date_end_locations - date_start_locations).total_seconds() * 1000, 2)
-
             #try:
-            if len(x_face_locations) > 0:
 
-                process_ms_encodings = 0
-                process_ms_searches = 0
+            process_ms_encodings = 0
+            process_ms_searches = 0
 
-                for i in range(len(x_face_locations)):
+            for i in range(len(data['frame_faces'])):
 
-                    # Find encodings for faces in the test iamge
+                # Find encodings for faces in the test iamge
 
-                    date_start_encodings = get_date_now()
-                    faces_encodings = face_encodings(data['frame_rgb'], known_face_locations = x_face_locations)[i]
-                    date_end_encodings = get_date_now()
+                date_start_encodings = get_date_now()
+                faces_encodings = face_encodings(data['frame_rgb'], known_face_locations = data['frame_faces'])[i]
+                date_end_encodings = get_date_now()
 
-                    process_ms_encodings += round((date_end_encodings - date_start_encodings).total_seconds() * 1000, 2)
+                process_ms_encodings += round((date_end_encodings - date_start_encodings).total_seconds() * 1000, 2)
 
-                    query = self.MD.SOLR_QUERY_DIST
+                query = self.MD.SOLR_QUERY_DIST
 
-                    for i, val in enumerate(faces_encodings):
-                        query += '{},'.format(str(val))
+                for i, val in enumerate(faces_encodings):
+                    query += '{},'.format(str(val))
 
-                    query += ')'
+                query += ')'
 
-                    date_start_search = get_date_now()
-                    searches = self.MD.SOLR.search(q = '*:*', sort = query + ' asc', fl = 'name,' + query)
-                    date_end_search = get_date_now()
+                date_start_search = get_date_now()
+                searches = self.MD.SOLR.search(q = '*:*', sort = query + ' asc', fl = 'name,' + query)
+                date_end_search = get_date_now()
 
-                    process_ms_searches += round((date_end_search - date_start_search).total_seconds() * 1000, 2)
+                process_ms_searches += round((date_end_search - date_start_search).total_seconds() * 1000, 2)
 
-                    # TODO: if searches query result != 0 ->
-                    total_success_count += 1
+                # TODO: if searches query result != 0 ->
+                total_success_count += 1
 
-                    top_name = ''
-                    top_dist = 0.0
+                top_name = ''
+                top_dist = 0.0
 
-                    for search in searches:
-                        try:
-                            name = search['name']
-                            dist = round(1.0 - search[query], 2)
-                        except KeyError as e:
-                            name = 'unknown'
-                            dist = 100.0
+                for search in searches:
+                    try:
+                        name = search['name']
+                        dist = round(1.0 - search[query], 2)
+                    except KeyError as e:
+                        name = 'unknown'
+                        dist = 100.0
 
-                        if dist > top_dist:
-                            top_dist = dist
-                            top_name = name
+                    if dist > top_dist:
+                        top_dist = dist
+                        top_name = name
 
-                    if top_dist >= distance_threshold:
-                        result_face = {'result': top_name, 'confidence': top_dist}
-                    else:
-                        result_face = {'result': 'unknown', 'confidence': -1.0}
+                if top_dist >= distance_threshold:
+                    result_face = {'result': top_name, 'confidence': top_dist}
+                else:
+                    result_face = {'result': 'unknown', 'confidence': -1.0}
 
-                    data['faces'].append(result_face)
+                data['faces'].append(result_face)
 
-                data['process']['encodings'] = process_ms_encodings
-                data['process']['search'] = process_ms_searches
+            data['process']['encodings'] = process_ms_encodings
+            data['process']['search'] = process_ms_searches
 
-            if total_success_count != len(x_face_locations):
-                msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(len(x_face_locations), total_success_count)
+            if total_success_count != data['found']:
+                msg = 'There are {} faces but {} faces processed successfully. Please check what (tf) is going on!'.format(data['found'], total_success_count)
                 data['message'] = msg
 
             if total_success_count > 0:

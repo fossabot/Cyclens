@@ -1,0 +1,23 @@
+general:
+    algorithm: "HAAR, HOG, LBP, DNN"
+    use: "OPENCV, DLIB"
+
+solr:
+    host: "localhost"
+    port: 27017
+
+modules:
+  - name: "action_recognition"
+    enable: true
+
+  - mac: "age_prediction"
+    enable: true
+
+  - mac: "emotion_recognition"
+    enable: true
+
+  - mac: "face_recognition"
+    enable: true
+
+  - mac: "gender_prediction"
+    enable: true
