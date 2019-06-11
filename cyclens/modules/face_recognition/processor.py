@@ -47,7 +47,7 @@ class FaceRecognitionPROC(Processor):
 
         data['module'] = self.MD.module_name
 
-        distance_threshold = 0.6
+        distance_threshold = 0.5
 
         total_success_count = 0
 
@@ -90,14 +90,16 @@ class FaceRecognitionPROC(Processor):
                 for search in searches:
                     try:
                         name = search['name']
-                        dist = round(1.0 - search[query], 2)
+                        dist = round(search[query], 2)
                     except KeyError as e:
                         name = 'unknown'
                         dist = 100.0
 
-                    if dist > top_dist:
+                    if dist >= top_dist:
                         top_dist = dist
                         top_name = name
+
+                print(top_dist, ' ', top_name)
 
                 if top_dist >= distance_threshold:
                     result_face = {'result': top_name, 'confidence': top_dist}

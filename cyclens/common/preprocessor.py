@@ -73,7 +73,7 @@ class PreProcessor:
         # TODO: configs den seç: opencv mi dlib mi, hog mu cnn mi
 
         result['frame_faces'] = self.CASC_FACE.detectMultiScale(image_gray, scaleFactor = 1.3, minNeighbors = 5)
-        # result['frame_faces'] = face_locations(image_gray, model="hog")
+        #result['frame_faces'] = face_locations(image_gray, model="hog")
 
         date_end_locations = datetime.now()
 

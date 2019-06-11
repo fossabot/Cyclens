@@ -32,6 +32,8 @@ import pysolr
 import math
 import re
 import threading
+import urllib.request
+import urllib.error
 
 from os.path import isfile
 from sklearn import neighbors
@@ -79,6 +81,26 @@ class FaceRecognitionMD(Module):
 
         # TODO: if server down and 400 code handling
         self.SOLR = pysolr.Solr(SOLR_URL, always_commit=True, timeout=1)
+
+        ping_url = '{}/admin/ping'.format(SOLR_URL)
+
+        try:
+            ping = urllib.request.urlopen(ping_url).read()
+
+            ping_res = json.loads(ping)
+
+            if ping_res['status'] == 'OK':
+                print("---> Solr service is working!!!")
+            else:
+                print("---> Couldn't ping to the Solr service")
+                exit(1)
+
+        except urllib.error.HTTPError as e:
+            print('Solr::HTTPError: {}'.format(e.code))
+            exit(1)
+        except urllib.error.URLError as e:
+            print('Solr::URLError: {}'.format(e.reason))
+            exit(1)
 
         self.SOLR_QUERY_DIST = 'dist(2,'
         for i in range(0, 128):
