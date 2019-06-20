@@ -309,12 +309,12 @@ class FaceRecognitionMD(Module):
         if len(x_face_locations) <= 0:
             result['success'] = False
             result['message'] = 'There is no face to process'
-            return json.dumps(result)
+            return result
 
         if len(x_face_locations) > 1:
             result['success'] = False
             result['message'] = 'There are more than one face!'
-            return json.dumps(result)
+            return result
 
         if len(x_face_locations) == 1:
 
@@ -325,21 +325,23 @@ class FaceRecognitionMD(Module):
 
             # Use the Apache Solr to add the face
 
-            if name is "":
+            if name == "":
                 name = "unknown"
-
-            data_solr['name'] = name
-
-            for i, val in enumerate(faces_encodings):
-                idx = '{}{}'.format(self.SOLR_VALUE_PREFIX, str(i))
-                data_solr[idx] = val
-
-            try:
-                self.SOLR.add([data_solr])
-                result['success'] = True
-            except pysolr.SolrError as e:
                 result['success'] = False
-                result['message'] = str(e)
+                result['message'] = 'Name is empty!'
+            else:
+                data_solr['name'] = name
+
+                for i, val in enumerate(faces_encodings):
+                    idx = '{}{}'.format(self.SOLR_VALUE_PREFIX, str(i))
+                    data_solr[idx] = val
+
+                try:
+                    self.SOLR.add([data_solr])
+                    result['success'] = True
+                except pysolr.SolrError as e:
+                    result['success'] = False
+                    result['message'] = str(e)
 
         return result
 

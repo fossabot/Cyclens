@@ -99,7 +99,7 @@ class FaceRecognitionPROC(Processor):
                         top_dist = dist
                         top_name = name
 
-                print(top_dist, ' ', top_name)
+                print('FR: TOP_DIST: ', top_dist, ', TOP_NAME: ', top_name)
 
                 if top_dist >= distance_threshold:
                     result_face = {'result': top_name, 'confidence': top_dist}

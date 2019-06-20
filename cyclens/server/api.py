@@ -345,7 +345,7 @@ class ApiServer(threading.Thread):
 
             result = self.do_faceadd(img, id, name, result)
 
-            print("[MODULE::FACE_RECOGNITION::FACE_ADD::PROCESS]: [END] - Result: {}".format(result))
+            print("[MODULE::FACE_RECOGNITION::FACE_ADD::PROCESS]: [END] - Requested: '{}', Result: {}".format(name, result))
 
             res = json.dumps(result)
             return self.get_res(res)
