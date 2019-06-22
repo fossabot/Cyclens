@@ -53,12 +53,17 @@
 
 Just send a POST request with module parameters to the Flask server.
 
-**Add Face:** curl -F "file=@/home/path/to/your/image/file.jpg" http://localhost:5000/api/v1/demo/face_add?id=0&name=FooBar
+* cURL POST 
+```bash
+$ curl -F "file=@/home/path/to/your/image/file.jpg" http://localhost:5000/api/v1/demo/single?ar=true&ap=true&er=true&fr=true&gp=true
+```
 
-**Single:** `curl -F "file=@/home/path/to/your/image/file.jpg" http://localhost:5000/api/v1/demo/single?ar=true&ap=true&er=true&fr=true&gp=true`
+* Face Recognition 
+```bash
+$ curl -F "file=@/home/path/to/your/image/file.jpg" http://localhost:5000/api/v1/demo/face_add?id=0&name=FooBar
+```
 
 * Example Output:
-
 ```json
 {
     "success": true,
@@ -90,7 +95,6 @@ Just send a POST request with module parameters to the Flask server.
                 }
             ]
         },
-	...
     ]
 }
 ```
@@ -128,7 +132,7 @@ $ python ./demo/demo.py
 
 ### Data Models
 
-1. Download [this](https://github.com/ageitgey/face_recognition_models/tree/master/face_recognition_models/models) and put in `./ models/data/face/`
+1. Download [this](https://github.com/ageitgey/face_recognition_models/tree/master/face_recognition_models/models) and put in `./models/data/face/`
 2. Download [this](https://github.com/Tony607/Keras_age_gender/releases/download/V1.0/weights.18-4.06.hdf5) and put in `./models/data/age/`
 3. Download [this](https://github.com/oarriaga/face_classification/raw/master/trained_models/gender_models/simple_CNN.81-0.96.hdf5) and put in `./models/data/gender/`
 4. Download [this](https://github.com/oarriaga/face_classification/raw/master/trained_models/emotion_models/fer2013_mini_XCEPTION.102-0.66.hdf5) and put in `./models/data/emotion/`
@@ -142,11 +146,6 @@ $ python ./demo/demo.py
 ## Dependencies
 
 * Please see the **[requirements.txt](https://github.com/Dentrax/Cyclens/blob/master/requirements.txt)** file for dependency informations
-
-## Benchmark Results
-
-![Notification](https://raw.githubusercontent.com/Dentrax/Netlyser/master/screenshots/ss_0.png)
-![Notification](https://raw.githubusercontent.com/Dentrax/Netlyser/master/screenshots/ss_1.png)
 
 ## Collaborators
 
