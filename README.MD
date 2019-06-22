@@ -51,6 +51,8 @@
 
 ## How To Use
 
+* Download the Cyclens Mobile Client [here](https://github.com/metinUr/cyclens-client)
+
 Just send a POST request with module parameters to the Flask server.
 
 * cURL POST 
