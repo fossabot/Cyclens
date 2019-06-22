@@ -1,75 +1,178 @@
-# cyclens-server
+# [Cyclens](https://github.com/Dentrax/Cyclens)
 
-## Run
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FDentrax%2FCyclens.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FDentrax%2FCyclens?ref=badge_shield)
+[![Sourcegraph](https://img.shields.io/badge/view%20on-Sourcegraph-brightgreen.svg)](https://sourcegraph.com/github.com/Dentrax/Cyclens)
 
-1. `source ./bin/activate`
-2. `python -m cyclens`
+**Blazingly Fast, Async, Multi-Task, All-in-One, Image Recognition Modules**
 
-## Run 2
+[What It Is](#what-it-is)
 
-1. `source ./bin/activate`
-2. `cd cyclens`
-3. `python __main__.py`
+[Features](#features)
 
-## Live Test
+[How To Use](#how-to-use)
 
-* Fast
+[Installation](#installation)
 
-`curl -F "file=@/home/dentrax/Pictures/Wallpapers/wp1.jpg" http://localhost:5000/api/v1/demo`
+[Requirements](#requirements)
 
-* Pretty
+[Dependencies](#dependencies)
 
-`curl -F "file=@/home/dentrax/Projects/Bitbucket/cyclens-server/tests/images/test3.jpg" http://localhost:5000/api/v1/demo | python -m json.tool | bat -p -l json`
+[Collaborators](#collaborators)
 
-## Camera Capture
+[Branches](#branches)
 
-`mpv av://v4l2:/dev/video0 --screenshot-template="%F-%wHh%wMm%wSs%wTms"`
+[Copyright & Licensing](#copyright--licensing)
 
-## Common Issues
+[Contributing](#contributing)
 
-* `emoticon` değil `emotion` !!!
-* `recognation` değil `recognition` !!!
+## What It Is
+
+**Cyclens is an All-in-One recognition API server with Async features.**
+
+* Age Prediction
+
+* Emotion Recognition
+
+* Face Recognition
+
+* Gender Prediction
+
+## Features
+
+* Pipeline based process structure between tasks
+
+* Async powered, non-blocking API loop
+
+* Multitask struct for each module process
+
+* Apache Solr powered face search engine
+
+## How To Use
+
+Just send a POST request with module parameters to the Flask server.
+
+**Add Face:** curl -F "file=@/home/path/to/your/image/file.jpg" http://localhost:5000/api/v1/demo/face_add?id=0&name=FooBar
+
+**Single:** `curl -F "file=@/home/path/to/your/image/file.jpg" http://localhost:5000/api/v1/demo/single?ar=true&ap=true&er=true&fr=true&gp=true`
+
+* Example Output:
+
+```json
+{
+    "success": true,
+    "message": "null",
+    "process": {
+        "start": "2019-06-02T01:50:05.731130",
+        "end": "2019-06-02T01:50:06.580368",
+        "total": 849.24
+    },
+    "modules": [
+        {
+            "success": true,
+            "module": "module_name",
+            "message": "null",
+            "process": {
+                "start": "2019-06-02T01:50:05.731208",
+                "end": "2019-06-02T01:50:06.579839",
+                "total": 848.63,
+                "locations": 97.39,
+                "encodings": 240.98,
+                "search": 21.1
+            },
+            "found": 1,
+            "rate": 100.0,
+            "faces": [
+                {
+                    "result": "Test",
+                    "confidence": 0.87
+                }
+            ]
+        },
+	...
+    ]
+}
+```
 
 ## Installation
 
+1. Clone the project to your computer and navigate to folder by executing the following command:
 ```bash
-virtualenv -p python3 ./
-source ./bin/activate
-pip install -r requirements.txt
+$ git clone https://github.com/Dentrax/Cyclens.git && cd ./Cyclens/
 ```
 
-## PreCheck
+2. Create your own virtualenv and install the requirements by executing the following commands:
+```bash
+$ virtualenv -p python ./
+$ source ./bin/activate
+$ pip install -r requirements.txt
+```
 
-`pacman -Qs nvidia` : Olması gereken paketler:
+3. Run the Cyclens with following command
+```bash
+$ sh ./start.sh
+```
 
-1. `cuda`
-2. `cudnn`
-3. `nvidia`
-3. `nvidia-settings`
-4. `bumblebee`
+* Run this command if you want to test all cases
+```bash
+$ python -m unittest -v
+```
 
-## Check
+* Run this command if you want to test demo project
+```bash
+$ python ./demo/demo.py
+```
 
-* `virtualenv` aktif edildiği zaman;
+## Requirements
 
-1. `which python3` : Bulunan dosyayı göstermeli, `/usr/bin/...` değil!
+### Data Models
 
-2. `python3 -c 'import tensorflow as tf; print(tf.__version__)'`: TensorFlow sürümünü vermeli
+1. Download [this](https://github.com/ageitgey/face_recognition_models/tree/master/face_recognition_models/models) and put in `./ models/data/face/`
+2. Download [this](https://github.com/Tony607/Keras_age_gender/releases/download/V1.0/weights.18-4.06.hdf5) and put in `./models/data/age/`
+3. Download [this](https://github.com/oarriaga/face_classification/raw/master/trained_models/gender_models/simple_CNN.81-0.96.hdf5) and put in `./models/data/gender/`
+4. Download [this](https://github.com/oarriaga/face_classification/raw/master/trained_models/emotion_models/fer2013_mini_XCEPTION.102-0.66.hdf5) and put in `./models/data/emotion/`
 
-3. `optirun python3 -c 'import tensorflow as tf; print(tf.__version__)'`: TensorFlow-GPU sürümünü vermeli
+### Apache Solr
 
-## PostCheck
+1. Download the Apache Solr [here](https://lucene.apache.org/solr/downloads.html)
+2. Start the Solr with: `./bin/solr start`
+3. Make sure the Solr running on the port `8983`
 
-* `nvidia-smi`: Düzgün çalışıp bilgileri doğru bir şekilde almalı
+## Dependencies
 
-* `nvidia-settings -q all`: Düzgün çalışıp bilgileri doğru bir şekilde almalı
+* Please see the **[requirements.txt](https://github.com/Dentrax/Cyclens/blob/master/requirements.txt)** file for dependency informations
 
-* `optirun nvidia-settings -c :8`: Ayarların doğru olduğundan ve *PowerMizer*, `MAX PERFORMANCE` olarak ayarlandığından emin olunmalı 
+## Benchmark Results
 
-KANSER OLMAMAK ICIN TUM ADIMLARIN DUZGUN CALISTIGINDAN EMIN OL!!!
+![Notification](https://raw.githubusercontent.com/Dentrax/Netlyser/master/screenshots/ss_0.png)
+![Notification](https://raw.githubusercontent.com/Dentrax/Netlyser/master/screenshots/ss_1.png)
 
-## GPU TEST
+## Collaborators
 
-* `watch -n 1 nvidia-smi`: Açık dursun
+* Furkan Türkal (GitHub: **[Dentrax](https://github.com/Dentrax)**)
+* Metin UR (GitHub: **[metinUr](https://github.com/metinUr)**)
 
-* `optirun glxspheres64`: Çalıştır ve kontrol et
+## Branches
+
+We publish source for the **[Cyclens]** in single rolling branch:
+
+The **[master branch](https://github.com/Dentrax/Cyclens/tree/master)** is extensively tested and makes a great starting point. Also tracks [live changes](https://github.com/Dentrax/Cyclens/commits/master) by commits.
+
+## Copyright & Licensing
+ 
+ All program code (i.e. .py) is licensed under **MIT** License unless otherwise specified. Please see the **[LICENSE](https://github.com/Dentrax/Netlyser/blob/master/LICENSE)** file for more information.
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FDentrax%2FCyclens.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FDentrax%2FCyclens?ref=badge_large)
+
+**References**
+
+While this repository is being prepared, it may have been quoted from some sources.
+
+Please see the **[REFERENCES](https://github.com/Dentrax/Cyclens/blob/master/REFERENCES)** file for more information.
+
+If there is an unspecified source or if you think that I made a copyright infringement, please contact with me.
+
+## Contributing
+
+Please check the [CONTRIBUTING.MD](CONTRIBUTING.MD) file for contribution instructions and naming guidelines.
