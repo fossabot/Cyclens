@@ -132,14 +132,14 @@ $ python ./demo/demo.py
 
 ### Data Models
 
-1. Download [this](https://github.com/ageitgey/face_recognition_models/tree/master/face_recognition_models/models) and put in `./models/data/face/`
-2. Download [this](https://github.com/Tony607/Keras_age_gender/releases/download/V1.0/weights.18-4.06.hdf5) and put in `./models/data/age/`
-3. Download [this](https://github.com/oarriaga/face_classification/raw/master/trained_models/gender_models/simple_CNN.81-0.96.hdf5) and put in `./models/data/gender/`
-4. Download [this](https://github.com/oarriaga/face_classification/raw/master/trained_models/emotion_models/fer2013_mini_XCEPTION.102-0.66.hdf5) and put in `./models/data/emotion/`
+1. Download [this](https://github.com/Tony607/Keras_age_gender/releases/download/V1.0/weights.18-4.06.hdf5) and put in `./models/data/age/`
+2. Download [this](https://github.com/oarriaga/face_classification/raw/master/trained_models/emotion_models/fer2013_mini_XCEPTION.102-0.66.hdf5) and put in `./models/data/emotion/`
+3. Download [this](https://github.com/ageitgey/face_recognition_models/tree/master/face_recognition_models/models) and put in `./models/data/face/`
+4. Download [this](https://github.com/oarriaga/face_classification/raw/master/trained_models/gender_models/simple_CNN.81-0.96.hdf5) and put in `./models/data/gender/`
 
 ### Apache Solr
 
-1. Download the Apache Solr [here](https://lucene.apache.org/solr/downloads.html)
+1. Download the Apache Solr from [here](https://lucene.apache.org/solr/downloads.html)
 2. Start the Solr with: `./bin/solr start`
 3. Make sure the Solr running on the port `8983`
 
